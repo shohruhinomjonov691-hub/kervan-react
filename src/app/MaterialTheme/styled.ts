@@ -1,5 +1,15 @@
 import { styled } from "@mui/material/styles";
 import Badge from "@mui/material/Badge";
+import { Box } from "@mui/material";
+
+export const StyledBadge = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: "#ffffff",
+  borderRadius: "999px",
+  padding: "2px 10px",
+  fontSize: "0.75rem",
+  fontWeight: 600,
+}));
 
 export const RippleBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {

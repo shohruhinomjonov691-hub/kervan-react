@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import Hero from "./Hero";
 import Statistics from "./Statistics";
 import PopularDishes from "./PopularDishes";
 import NewDishes from "./NewDishes";
@@ -25,35 +26,32 @@ const actionDispatch = (dispatch: Dispatch) => ({
 export default function HomePage() {
   const { setPopularDishes, setNewDishes, setTopUsers } =
     actionDispatch(useDispatch());
-  // Selector: Store => Data
 
   useEffect(() => {
-    // Backend server data request => Data
     const product = new ProductService();
+
+    // Signature Dishes — most viewed KEBABs
     product
       .getProducts({
         page: 1,
         limit: 4,
         order: "productViews",
-        productCollection: ProductCollection.DISH,
+        productCollection: ProductCollection.KEBAB,
       })
-      .then((data) => {
-        setPopularDishes(data);
-      })
+      .then((data) => setPopularDishes(data))
       .catch((err) => console.log(err));
 
+    // New Menu — latest added (any collection)
     product
       .getProducts({
         page: 1,
         limit: 4,
         order: "createdAt",
-        // productCollection: ProductCollection.DISH,
       })
-      .then((data) => {
-        setNewDishes(data);
-      })
+      .then((data) => setNewDishes(data))
       .catch((err) => console.log(err));
 
+    // Top Members
     const member = new MemberService();
     member
       .getTopUsers()
@@ -62,7 +60,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className={"homepage"}>
+    <div className="homepage">
+      <Hero />
       <Statistics />
       <PopularDishes />
       <NewDishes />

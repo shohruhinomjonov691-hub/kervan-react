@@ -1,8 +1,9 @@
-import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+// src/app/store.ts — branch reducer kerak emas (BranchService to'g'ridan chaqiriladi)
+import { configureStore } from "@reduxjs/toolkit";
 import HomePageReducer from "./screens/homePage/slice";
 import ProductsPageReducer from "./screens/productsPage/slice";
-import reduxLogger from "redux-logger";
 import OrdersPageReducer from "./screens/ordersPage/slice";
+import reduxLogger from "redux-logger";
 
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
@@ -12,14 +13,9 @@ export const store = configureStore({
     homePage: HomePageReducer,
     productsPage: ProductsPageReducer,
     ordersPage: OrdersPageReducer,
+    // Branch → Redux emas, to'g'ridan useEffect da chaqiriladi
   },
 });
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;

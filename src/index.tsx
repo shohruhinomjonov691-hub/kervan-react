@@ -11,7 +11,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import "./css/index.css";
 import ContextProvider from "./app/context/ContextProvider";
 
-// GLOBAL INTEGRATION > MUI , REDUX, ROUTER, SocketID, Context WebSocket ReactiveVariable Apollo ReactQuery ...
+// GLOBAL INTEGRATION > MUI , REDUX, ROUTER, Socket.io, Context WebSocket ReactiveVariable Apollo ReactQuery ...
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 // REAL DOM >

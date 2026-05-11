@@ -1,25 +1,18 @@
-import { useState, SyntheticEvent, useEffect } from "react";
-import { Container, Stack, Box } from "@mui/material";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import PausedOrders from "./PausedOrders";
-import ProcessOrders from "./ProcessOrders";
-import FinishedOrders from "./FinishedOrders";
+import React, { useEffect, useState } from "react";
+import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { Dispatch } from "@reduxjs/toolkit";
 import { setPausedOrders, setProcessOrders, setFinishedOrders } from "./slice";
-import { Order, OrderInquiry } from "../../../lib/types/order";
+import { Order } from "../../../lib/types/order";
 import { OrderStatus } from "../../../lib/enums/order.enum";
 import OrderService from "../../services/OrderService";
 import { useGlobals } from "../../hooks/useGlobals";
-import { useHistory } from "react-router-dom";
-import { serverApi } from "../../../lib/config";
-import { MemberType } from "../../../lib/enums/member.enum";
+import { sweetErrorHandling } from "../../../lib/sweetAlert";
+import PausedOrders from "./PausedOrders";
+import ProcessOrders from "./ProcessOrders";
+import FinishedOrders from "./FinishedOrders";
 import "../../../css/order.css";
 
-/* REDUX SLICE & SELECTOR */
 const actionDispatch = (dispatch: Dispatch) => ({
   setPausedOrders: (data: Order[]) => dispatch(setPausedOrders(data)),
   setProcessOrders: (data: Order[]) => dispatch(setProcessOrders(data)),
@@ -29,132 +22,66 @@ const actionDispatch = (dispatch: Dispatch) => ({
 export default function OrdersPage() {
   const { setPausedOrders, setProcessOrders, setFinishedOrders } =
     actionDispatch(useDispatch());
-  const { orderBuilder, authMember } = useGlobals();
-  const history = useHistory();
-  const [value, setValue] = useState("1");
-  const [orderInquiry, setOrderInquiry] = useState<OrderInquiry>({
-    page: 1,
-    limit: 5,
-    orderStatus: OrderStatus.PAUSE,
-  });
+  const { authMember, orderBuilder } = useGlobals();
+  const [tabValue, setTabValue] = useState("1");
 
   useEffect(() => {
+    if (!authMember) return;
     const order = new OrderService();
-
     order
-      .getMyOrders({ ...orderInquiry, orderStatus: OrderStatus.PAUSE })
+      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PAUSE })
       .then((data) => setPausedOrders(data))
-      .catch((err) => console.log(err));
-
+      .catch((err) => sweetErrorHandling(err));
     order
-      .getMyOrders({ ...orderInquiry, orderStatus: OrderStatus.PROCESS })
+      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PROCESS })
       .then((data) => setProcessOrders(data))
-      .catch((err) => console.log(err));
-
+      .catch((err) => sweetErrorHandling(err));
     order
-      .getMyOrders({ ...orderInquiry, orderStatus: OrderStatus.FINISH })
+      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.FINISH })
       .then((data) => setFinishedOrders(data))
-      .catch((err) => console.log(err));
-  }, [orderInquiry, orderBuilder]);
+      .catch((err) => sweetErrorHandling(err));
+  }, [authMember, orderBuilder]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** HANDLERS **/
+  if (!authMember) {
+    return (
+      <div className="orders-page">
+        <Container maxWidth="lg">
+          <Box className="orders-login-needed">
+            <Typography className="orders-login-title">
+              Please sign in to view your orders
+            </Typography>
+          </Box>
+        </Container>
+      </div>
+    );
+  }
 
-  const handleChange = (e: SyntheticEvent, newValue: string) => {
-    setValue(newValue);
-  };
-
-  if (!authMember) history.push("/");
   return (
-    <div className={"order-page"}>
-      <Container className={"order-container"}>
-        <Stack className={"order-left"}>
-          <TabContext value={value}>
-            <Box className={"order-nav-frame"}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <Tabs
-                  value={value}
-                  onChange={handleChange}
-                  aria-label="basic tabs example"
-                  className={"table_list"}
-                >
-                  <Tab label="PAUSED ORDERS" value={"1"} />
-                  <Tab label="PROCESS ORDERS" value={"2"} />
-                  <Tab label="FINISHED ORDERS" value={"3"} />
-                </Tabs>
-              </Box>
-            </Box>
-            <Stack className={"order-main-content"}>
-              <PausedOrders setValue={setValue} />
-              <ProcessOrders setValue={setValue} />
-              <FinishedOrders />
-            </Stack>
-          </TabContext>
-        </Stack>
+    <div className="orders-page">
+      <Container maxWidth="lg">
+        <Box className="orders-header">
+          <Typography className="orders-title">My Orders</Typography>
+          <Typography className="orders-sub">
+            Track and manage your Kervan orders.
+          </Typography>
+        </Box>
 
-        <Stack className={"order-right"}>
-          <Box className={"order-info-box"}>
-            <Box className={"member-box"}>
-              <div className={"order-user-img"}>
-                <img
-                  src={
-                    authMember?.memberImage
-                      ? `${serverApi}/${authMember.memberImage}`
-                      : "/icons/default-user.svg"
-                  }
-                  className={"order-user-avatar"}
-                  alt=""
-                />
-                <div className={"order-user-icon-box"}>
-                  <img
-                    src={
-                      authMember?.memberType === MemberType.RESTAURANT
-                        ? "/icons/restaurant.svg"
-                        : "/icons/user-badge.svg"
-                    }
-                    className={"order-user-prof-img"}
-                    alt=""
-                  />
-                </div>
-              </div>
-              <span className={"order-user-name"}>
-                {authMember?.memberNick}
-              </span>
-              <span className={"order-user-prof"}>
-                {authMember?.memberType}
-              </span>
-            </Box>
-            <Box className={"liner"}></Box>
-            <Box className={"order-user-address"}>
-              <div>
-                <LocationOnIcon />
-                <span className={"spec-address-txt"}>
-                  {authMember?.memberAddress
-                    ? authMember?.memberAddress
-                    : "Do not exist"}
-                </span>
-              </div>
-            </Box>
-          </Box>
+        <Box className="orders-tabs-wrap">
+          <Tabs
+            value={tabValue}
+            onChange={(_, v) => setTabValue(v)}
+            className="orders-tabs"
+            TabIndicatorProps={{ style: { backgroundColor: "#8d4b00" } }}
+          >
+            <Tab label="Pending" value="1" className="orders-tab" />
+            <Tab label="Processing" value="2" className="orders-tab" />
+            <Tab label="Completed" value="3" className="orders-tab" />
+          </Tabs>
+        </Box>
 
-          <Box className={"order-info-box"}>
-            <input
-              className={"card-input"}
-              placeholder="Card number : 5243 4090 2002 7495"
-            />
-            <div>
-              <input className="card-half-input" placeholder="07 / 24" />
-              <input className="card-half-input" placeholder="CVV : 010" />
-            </div>
-            <input className={"card-input"} placeholder="Jack Sparrow" />
-
-            <div className="cards-box">
-              <img src="/icons/western-card.svg" alt="" />
-              <img src="/icons/master-card.svg" alt="" />
-              <img src="/icons/paypal-card.svg" alt="" />
-              <img src="/icons/visa-card.svg" alt="" />
-            </div>
-          </Box>
-        </Stack>
+        {tabValue === "1" && <PausedOrders setValue={setTabValue} />}
+        {tabValue === "2" && <ProcessOrders setValue={setTabValue} />}
+        {tabValue === "3" && <FinishedOrders />}
       </Container>
     </div>
   );

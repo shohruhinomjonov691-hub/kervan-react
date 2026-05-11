@@ -1,95 +1,114 @@
 import React from "react";
-import { Box, Stack } from "@mui/material";
-import TabPanel from "@mui/lab/TabPanel";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import { retrieveFinishedOrders } from "./selector";
-import { serverApi } from "../../../lib/config";
 import { Order, OrderItem } from "../../../lib/types/order";
 import { Product } from "../../../lib/types/product";
+import { serverApi } from "../../../lib/config";
 
-/* REDUX SLICE & SELECTOR */
-const finishedOrdersRetriever = createSelector(
+const finishedRetriever = createSelector(
   retrieveFinishedOrders,
   (finishedOrders) => ({ finishedOrders }),
 );
 
 export default function FinishedOrders() {
-  const { finishedOrders } = useSelector(finishedOrdersRetriever);
+  const { finishedOrders } = useSelector(finishedRetriever);
+
+  if (!finishedOrders.length) {
+    return (
+      <Box className="orders-empty">
+        <Typography className="orders-empty-text">
+          No completed orders yet.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <TabPanel value={"3"}>
-      <Stack>
-        {finishedOrders?.map((order: Order) => {
-          return (
-            <Box key={order._id} className={"order-main-box"}>
-              <Box className={"order-box-scroll"}>
-                {order?.orderItems?.map((item: OrderItem) => {
-                  const product: Product = order.productData.filter(
-                    (ele: Product) => item.productId === ele._id,
-                  )[0];
-                  const imagePath = `${serverApi}/${product.productImages[0]}`;
-                  return (
-                    <Box key={item._id} className={"orders-name-price"}>
-                      <img
-                        src={imagePath}
-                        className={"order-dish-img"}
-                        alt=""
-                      />
-                      <p className={"title-dish"}>{product.productName}</p>
-                      <Box className={"price-box"}>
-                        <p>${item.itemPrice}</p>
-                        <img src={"/icons/close.svg"} alt="" />
-                        <p>{item.itemQuantity}</p>
-                        <img src={"/icons/pause.svg"} alt="" />
-                        <p style={{ marginLeft: "15px" }}>
-                          ${item.itemQuantity * item.itemPrice}
-                        </p>
-                      </Box>
-                    </Box>
-                  );
-                })}
-              </Box>
+    <Stack gap={3} className="orders-list">
+      {finishedOrders.map((order: Order) => (
+        <Box key={order._id} className="order-card order-card--finished">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="order-card-header"
+          >
+            <Stack direction="row" alignItems="center" gap={1}>
+              <CheckCircleOutlineIcon sx={{ fontSize: 18, color: "#2d7d5a" }} />
+              <Typography className="order-card-id">
+                #{String(order._id).slice(-8).toUpperCase()}
+              </Typography>
+            </Stack>
+            <Chip
+              label="Delivered"
+              size="small"
+              className="status-chip status-chip--delivered"
+            />
+          </Stack>
 
-              <Box className={"total-price-box"}>
-                <Box className={"box-total"}>
-                  <p>Product price</p>
-                  <p>${order.orderTotal - order.orderDelivery}</p>
+          <Stack gap={2} className="order-items-list">
+            {order.orderItems?.map((item: OrderItem) => {
+              const product: Product | undefined = order.productData?.find(
+                (p: Product) => String(p._id) === String(item.productId),
+              );
+              if (!product) return null;
+              return (
+                <Stack
+                  key={item._id}
+                  direction="row"
+                  alignItems="center"
+                  gap={2}
+                  className="order-item-row"
+                >
                   <img
-                    src={"/icons/plus.svg"}
-                    style={{ marginLeft: "20px" }}
-                    alt=""
+                    src={`${serverApi}/${product.productImages[0]}`}
+                    alt={product.productName}
+                    className="order-item-img"
                   />
-                  <p>Delivery cost</p>
-                  <p>${order.orderDelivery}</p>
-                  <img
-                    src={"/icons/pause.svg"}
-                    style={{ marginLeft: "20px" }}
-                    alt=""
-                  />
-                  <p>Total</p>
-                  <p>${order.orderTotal}</p>
-                </Box>
-              </Box>
+                  <Box className="order-item-info">
+                    <Typography className="order-item-name">
+                      {product.productName}
+                    </Typography>
+                    <Typography className="order-item-meta">
+                      ₩{item.itemPrice.toLocaleString()} × {item.itemQuantity}
+                    </Typography>
+                  </Box>
+                  <Typography className="order-item-subtotal">
+                    ₩{(item.itemPrice * item.itemQuantity).toLocaleString()}
+                  </Typography>
+                </Stack>
+              );
+            })}
+          </Stack>
+
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="order-card-footer"
+          >
+            <Box>
+              <Typography className="order-total-label">Total Paid</Typography>
+              <Typography className="order-total-value">
+                ₩{order.orderTotal.toLocaleString()}
+              </Typography>
             </Box>
-          );
-        })}
-
-        {!finishedOrders ||
-          (finishedOrders.length === 0 && (
-            <Box
-              display={"flex"}
-              flexDirection={"row"}
-              justifyContent={"center"}
+            <Typography
+              sx={{
+                fontFamily: "'Be Vietnam Pro', sans-serif",
+                fontSize: "0.8125rem",
+                color: "#2d7d5a",
+                fontWeight: 600,
+              }}
             >
-              <img
-                src={"/icons/noimage-list.svg"}
-                style={{ width: 300, height: 300 }}
-                alt=""
-              />
-            </Box>
-          ))}
-      </Stack>
-    </TabPanel>
+              ✓ Thank you for your order!
+            </Typography>
+          </Stack>
+        </Box>
+      ))}
+    </Stack>
   );
 }

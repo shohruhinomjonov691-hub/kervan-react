@@ -1,52 +1,42 @@
 import React from "react";
-import { Box, Stack } from "@mui/material";
-import Button from "@mui/material/Button";
-import TabPanel from "@mui/lab/TabPanel";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import { retrievePausedOrders } from "./selector";
-import { Messages, serverApi } from "../../../lib/config";
 import { Order, OrderItem, OrderUpdateInput } from "../../../lib/types/order";
 import { Product } from "../../../lib/types/product";
-import { sweetErrorHandling } from "../../../lib/sweetAlert";
 import { OrderStatus } from "../../../lib/enums/order.enum";
+import { Messages, serverApi } from "../../../lib/config";
+import { sweetErrorHandling } from "../../../lib/sweetAlert";
 import { useGlobals } from "../../hooks/useGlobals";
 import OrderService from "../../services/OrderService";
 import { T } from "../../../lib/types/common";
 
-/* REDUX SLICE & SELECTOR */
-const pausedOrdersRetriever = createSelector(
+const pausedRetriever = createSelector(
   retrievePausedOrders,
   (pausedOrders) => ({ pausedOrders }),
 );
 
 interface PausedOrdersProps {
-  setValue: (input: string) => void;
+  setValue: (v: string) => void;
 }
 
-export default function PausedOrders(props: PausedOrdersProps) {
-  const { setValue } = props;
+export default function PausedOrders({ setValue }: PausedOrdersProps) {
   const { authMember, setOrderBuilder } = useGlobals();
-  const { pausedOrders } = useSelector(pausedOrdersRetriever);
+  const { pausedOrders } = useSelector(pausedRetriever);
 
-  /** HANDLERS **/
   const deleteOrderHandler = async (e: T) => {
     try {
       if (!authMember) throw new Error(Messages.error2);
-      const orderId = e.target.value;
+      const confirmed = window.confirm("Delete this order?");
+      if (!confirmed) return;
       const input: OrderUpdateInput = {
-        orderId: orderId,
+        orderId: e.target.value,
         orderStatus: OrderStatus.DELETE,
       };
-
-      const confirmation = window.confirm("Do you want to delete the order?");
-      if (confirmation) {
-        const order = new OrderService();
-        await order.updateOrders(input);
-        setOrderBuilder(new Date());
-      }
+      await new OrderService().updateOrders(input);
+      setOrderBuilder(new Date());
     } catch (err) {
-      console.log(err);
       sweetErrorHandling(err).then();
     }
   };
@@ -54,119 +44,130 @@ export default function PausedOrders(props: PausedOrdersProps) {
   const processOrderHandler = async (e: T) => {
     try {
       if (!authMember) throw new Error(Messages.error2);
-      //PAYMENT PROCESS
-
-      const orderId = e.target.value;
+      const confirmed = window.confirm("Proceed with payment?");
+      if (!confirmed) return;
       const input: OrderUpdateInput = {
-        orderId: orderId,
+        orderId: e.target.value,
         orderStatus: OrderStatus.PROCESS,
       };
-
-      const confirmation = window.confirm(
-        "Do you want to proceed with payment?",
-      );
-      if (confirmation) {
-        const order = new OrderService();
-        await order.updateOrders(input);
-        setValue("2");
-        setOrderBuilder(new Date());
-      }
+      await new OrderService().updateOrders(input);
+      setValue("2");
+      setOrderBuilder(new Date());
     } catch (err) {
-      console.log(err);
       sweetErrorHandling(err).then();
     }
   };
 
+  if (!pausedOrders.length) {
+    return (
+      <Box className="orders-empty">
+        <Typography className="orders-empty-text">
+          No pending orders at the moment.
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <TabPanel value={"1"}>
-      <Stack>
-        {pausedOrders?.map((order: Order) => {
-          return (
-            <Box key={order._id} className={"order-main-box"}>
-              <Box className={"order-box-scroll"}>
-                {order?.orderItems?.map((item: OrderItem) => {
-                  const product: Product = order.productData.filter(
-                    (ele: Product) => item.productId === ele._id,
-                  )[0];
-                  const imagePath = `${serverApi}/${product.productImages[0]}`;
-                  return (
-                    <Box key={item._id} className={"orders-name-price"}>
-                      <img
-                        src={imagePath}
-                        className={"order-dish-img"}
-                        alt=""
-                      />
-                      <p className={"title-dish"}>{product.productName}</p>
-                      <Box className={"price-box"}>
-                        <p>${item.itemPrice}</p>
-                        <img src={"/icons/close.svg"} alt="" />
-                        <p>{item.itemQuantity}</p>
-                        <img src={"/icons/pause.svg"} alt="" />
-                        <p style={{ marginLeft: "15px" }}>
-                          ${item.itemQuantity * item.itemPrice}
-                        </p>
-                      </Box>
-                    </Box>
-                  );
-                })}
-              </Box>
+    <Stack gap={3} className="orders-list">
+      {pausedOrders.map((order: Order) => (
+        <Box key={order._id} className="order-card">
+          {/* Order status header */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="order-card-header"
+          >
+            <Box>
+              <Typography className="order-card-id">
+                #{String(order._id).slice(-8).toUpperCase()}
+              </Typography>
+            </Box>
+            <Chip
+              label="Pending"
+              size="small"
+              className="status-chip status-chip--pending"
+            />
+          </Stack>
 
-              <Box className={"total-price-box"}>
-                <Box className={"box-total"}>
-                  <p>Product price</p>
-                  <p>${order.orderTotal - order.orderDelivery}</p>
+          {/* Items */}
+          <Stack gap={2} className="order-items-list">
+            {order.orderItems?.map((item: OrderItem) => {
+              const product: Product | undefined = order.productData?.find(
+                (p: Product) => String(p._id) === String(item.productId),
+              );
+              if (!product) return null;
+              const imgSrc = `${serverApi}/${product.productImages[0]}`;
+              return (
+                <Stack
+                  key={item._id}
+                  direction="row"
+                  alignItems="center"
+                  gap={2}
+                  className="order-item-row"
+                >
                   <img
-                    src={"/icons/plus.svg"}
-                    style={{ marginLeft: "20px" }}
-                    alt=""
+                    src={imgSrc}
+                    alt={product.productName}
+                    className="order-item-img"
                   />
-                  <p>Delivery cost</p>
-                  <p>${order.orderDelivery}</p>
-                  <img
-                    src={"/icons/pause.svg"}
-                    style={{ marginLeft: "20px" }}
-                    alt=""
-                  />
-                  <p>Total</p>
-                  <p>${order.orderTotal}</p>
+                  <Box className="order-item-info">
+                    <Typography className="order-item-name">
+                      {product.productName}
+                    </Typography>
+                    <Typography className="order-item-meta">
+                      ₩{item.itemPrice.toLocaleString()} × {item.itemQuantity}
+                    </Typography>
+                  </Box>
+                  <Typography className="order-item-subtotal">
+                    ₩{(item.itemPrice * item.itemQuantity).toLocaleString()}
+                  </Typography>
+                </Stack>
+              );
+            })}
+          </Stack>
+
+          {/* Footer */}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            className="order-card-footer"
+          >
+            <Box>
+              <Typography className="order-total-label">Total</Typography>
+              <Typography className="order-total-value">
+                ₩{order.orderTotal.toLocaleString()}
+                <Box component="span" className="order-delivery-note">
+                  {" "}
+                  (+₩{order.orderDelivery.toLocaleString()} delivery)
                 </Box>
-                <Button
-                  value={order._id}
-                  variant="contained"
-                  color="secondary"
-                  className={"cancel-button"}
-                  onClick={deleteOrderHandler}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  value={order._id}
-                  variant="contained"
-                  className={"pay-button"}
-                  onClick={processOrderHandler}
-                >
-                  Payment
-                </Button>
-              </Box>
+              </Typography>
             </Box>
-          );
-        })}
-
-        {!pausedOrders ||
-          (pausedOrders.length === 0 && (
-            <Box
-              display={"flex"}
-              flexDirection={"row"}
-              justifyContent={"center"}
-            >
-              <img
-                src={"/icons/noimage-list.svg"}
-                style={{ width: 300, height: 300 }}
-                alt=""
-              />
-            </Box>
-          ))}
-      </Stack>
-    </TabPanel>
+            <Stack direction="row" gap={1.5}>
+              <Button
+                variant="outlined"
+                size="small"
+                value={String(order._id)}
+                onClick={deleteOrderHandler}
+                className="order-btn order-btn--delete"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                value={String(order._id)}
+                onClick={processOrderHandler}
+                className="order-btn order-btn--pay"
+              >
+                Pay Now
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      ))}
+    </Stack>
   );
 }

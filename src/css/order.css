@@ -1,351 +1,213 @@
-.order-page {
-  width: 100%;
-  height: auto;
-  background: #f8f8ff;
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
+
+.orders-page {
+  min-height: 80vh;
+  padding: 48px 0 80px;
+  background: #fcf9f8;
+}
+
+/* Header */
+.orders-header {
+  padding-bottom: 32px;
+}
+.orders-title {
+  font-family: "Noto Serif", serif !important;
+  font-size: 2.25rem !important;
+  font-weight: 700 !important;
+  color: #1c1b1b !important;
+  margin-bottom: 6px !important;
+}
+.orders-sub {
+  font-size: 0.9375rem !important;
+  color: #887364 !important;
+}
+
+/* Login needed */
+.orders-login-needed {
   display: flex;
-}
-
-.order-page .order-container {
-  margin-top: 50px;
-  margin-bottom: 50px;
-  display: flex;
-  flex-direction: row;
-}
-
-.order-page .order-left {
-  width: 860px;
-  height: auto;
-}
-
-.order-page .order-right {
-  width: 360px;
-  height: auto;
-  margin-top: 86px;
-  margin-left: 30px;
-  display: flex;
-  flex-direction: column;
-}
-
-.order-page .order-right .order-info-box {
-  width: 360px;
-  height: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #f8f8ff;
-  box-shadow:
-    15px 14px 4px rgba(0, 0, 0, 0.25),
-    inset -1px 0px 16px 13px rgb(24 23 112 / 20%);
-  border-radius: 16px;
-  margin-bottom: 25px;
-}
-.order-page .order-right .order-info-box .member-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.order-page .order-right .order-info-box .liner {
-  width: 100%;
-  border: 1px solid #a1a1a1;
-  margin-top: 40px;
-  margin-bottom: 8px;
-}
-
-.order-page .order-info-box .order-user-img {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.order-page .order-info-box .order-user-img .order-user-avatar {
-  width: 117px;
-  height: 112px;
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
-  border-radius: 37px;
-}
-
-.order-page .order-info-box .order-user-icon-box {
-  position: absolute;
-  padding: 5px;
-  width: 30px;
-  height: 30px;
-  top: 81%;
-  right: 0;
-  display: flex;
-  background: rgba(0, 0, 0, 0.33);
-  border-radius: 37px;
-}
-
-.order-page .order-user-icon-box .order-user-prof-img {
-  filter: brightness(0) invert(1);
-}
-
-.order-page .order-info-box .order-user-name {
-  margin-top: 10px;
-  font-family: "Commissioner";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 28px;
-  line-height: 36px;
-  color: #08090d;
-}
-
-.order-page .order-info-box .order-user-prof {
-  font-family: "Commissioner";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 36px;
-  color: #a1a1a1;
-}
-
-.order-page .order-info-box .order-user-address {
-  width: 90%;
-  display: flex;
-  flex-direction: row;
-}
-
-.order-page .order-info-box .spec-address-txt {
-  margin-left: 5px;
-  font-family: "DM Sans";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: #616164;
-}
-
-.order-page .order-info-box .card-input {
-  margin-top: 10px;
-  padding: 10px;
-  width: 100%;
-  height: 40px;
-  background: #f5f5f5;
-  border-radius: 10px;
-  font-family: "Nunito";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  border: 0.5px solid #b3a6a6;
-  letter-spacing: -0.02em;
-  color: #434141;
-}
-
-.order-page .order-right .card-half-input {
-  margin-top: 10px;
-  padding: 10px;
-  width: 49%;
-  height: 40px;
-  background: #f5f5f5;
-  border-radius: 10px;
-  font-family: "Nunito";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 22px;
-  border: 0.5px solid #b3a6a6;
-  letter-spacing: -0.02em;
-  color: #434141;
-}
-
-.order-page .order-right .cards-box {
-  margin-top: 35px;
-  width: 80%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.order-page .order-info-box .css-wca78v-MuiButtonBase-root-MuiButton-root {
-  min-width: 160px;
-}
-
-.order-page .order-left .order-nav-frame {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  border-bottom: 1px solid #f8f8ff;
-}
-
-.order-page .order-left .order-nav-frame .table_list {
-  display: flex;
-  justify-content: space-between;
-}
-
-.order-page .css-1gsv261 {
-  width: 75%;
-}
-
-.order-page .css-heg063-MuiTabs-flexContainer {
-  justify-content: space-between;
-}
-
-.order-page .order-main-content {
-  width: 855px;
-  height: auto;
-}
-
-.order-page .css-19kzrtu {
-  padding-top: 24px;
-}
-
-.order-page .order-main-content .order-main-box {
-  position: relative;
-  width: 100%;
-  max-height: 285px;
-  margin-bottom: 25px;
-  background: #f8f8ff;
-  box-shadow:
-    -13px 16px 4px rgba(0, 0, 0, 0.25),
-    inset 0px -3px 20px 21px #18177033;
-  border-radius: 16px;
-}
-
-.order-page .order-main-content .order-main-box .order-box-scroll {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  min-height: 105px;
-  max-height: 205px;
-  margin-top: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  overflow-y: scroll;
-}
-
-.order-page
-  .order-main-content
-  .order-main-box
-  .order-box-scroll::-webkit-scrollbar {
-  width: 7px;
-}
-
-.order-page
-  .order-main-content
-  .order-main-box
-  .order-box-scroll::-webkit-scrollbar-thumb {
-  background-color: #8989db;
-  border-radius: 5px;
-}
-
-.order-page .order-box-scroll .orders-name-price {
-  position: relative;
-  height: 47px;
-  margin-top: 5px;
-  margin-left: 50px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.order-page .order-box-scroll .orders-name-price .order-dish-img {
-  position: relative;
-  width: 50px;
-  height: 47px;
-  border-radius: 29px;
-  background-size: cover;
-}
-
-.order-page .order-box-scroll .orders-name-price .title-dish {
-  position: relative;
-  width: 260px;
-  height: 36px;
-  margin-left: 20px;
-  font-family: "Commissioner";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 22px;
-  line-height: 36px;
-  color: #000000;
-}
-
-.order-page .order-box-scroll .orders-name-price .price-box {
-  position: relative;
-  max-width: 170px;
-  height: 100%;
-  margin-left: 150px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-.order-page .order-box-scroll .orders-name-price .price-box p {
-  font-family: "Poppins";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 27px;
-  color: #262626;
-}
-
-.order-page .order-main-content .order-main-box .total-price-box {
-  position: relative;
-  width: 100%;
-  height: 41px;
-  margin: 7px 0 7px 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  box-sizing: border-box;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.order-page .order-main-content .total-price-box .cancel-button {
-  border-radius: 10px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  max-height: 40px;
-}
-
-.order-page .order-main-content .total-price-box .pay-button {
-  background: #56b74d;
-  color: #f8f8ff;
-  border-radius: 10px;
-  max-height: 40px;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-}
-.order-page .order-main-content .total-price-box .verify-button {
-  background: #0288d1;
-  color: #f8f8ff;
-  border-radius: 10px;
-  box-shadow:
-    0px 4px 4px rgba(0, 0, 0, 0.25),
-    inset 0px 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-.order-page .order-main-content .order-main-box .total-price-box .box-total {
-  position: relative;
-  max-width: 535px;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: center;
+  min-height: 50vh;
+}
+.orders-login-title {
+  font-family: "Noto Serif", serif;
+  font-size: 1.5rem;
+  color: #887364;
 }
 
-.order-page .total-price-box .box-total p {
-  margin-left: 20px;
-  font-family: "Commissioner";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 36px;
-  color: #000000;
+/* Tabs */
+.orders-tabs-wrap {
+  border-bottom: 1px solid rgba(219, 194, 176, 0.4);
+  margin-bottom: 32px;
+}
+.orders-tabs .MuiTab-root {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  color: #887364 !important;
+}
+.orders-tabs .Mui-selected {
+  color: #8d4b00 !important;
 }
 
-.order-page .total-price-box .box-total .data-compl {
-  font-family: "Commissioner";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 36px;
-  color: #000000;
+/* Orders list */
+.orders-list {
+  padding-bottom: 20px;
+}
+
+/* Empty */
+.orders-empty {
+  padding: 60px 0;
+  text-align: center;
+}
+.orders-empty-text {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1rem;
+  color: #dbc2b0;
+}
+
+/* Order card */
+.order-card {
+  background: #fff;
+  border: 1px solid rgba(219, 194, 176, 0.35);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(141, 75, 0, 0.05);
+}
+.order-card--finished {
+  border-color: rgba(45, 125, 90, 0.2);
+}
+.order-card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(219, 194, 176, 0.25);
+  background: #faf7f4;
+}
+.order-card-id {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #554336;
+  letter-spacing: 0.05em;
+}
+
+/* Status chips */
+.status-chip {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.6875rem !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+}
+.status-chip--pending {
+  background: rgba(160, 90, 0, 0.1) !important;
+  color: #a05a00 !important;
+}
+.status-chip--processing {
+  background: rgba(141, 75, 0, 0.1) !important;
+  color: #8d4b00 !important;
+}
+.status-chip--delivered {
+  background: rgba(45, 125, 90, 0.1) !important;
+  color: #2d7d5a !important;
+}
+
+/* Items list inside card */
+.order-items-list {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.order-item-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.order-item-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(219, 194, 176, 0.3);
+}
+.order-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.order-item-name {
+  font-family: "Noto Serif", serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1c1b1b;
+}
+.order-item-meta {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  color: #887364;
+  margin-top: 3px;
+}
+.order-item-subtotal {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #8d4b00;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Card footer */
+.order-card-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(219, 194, 176, 0.25);
+  background: #faf7f4;
+}
+.order-total-label {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  color: #887364;
+}
+.order-total-value {
+  font-family: "Noto Serif", serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1c1b1b;
+}
+.order-delivery-note {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #887364;
+}
+
+/* Buttons */
+.order-btn {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 999px !important;
+  padding: 6px 18px !important;
+}
+.order-btn--delete {
+  border-color: #e8d9cc !important;
+  color: #887364 !important;
+}
+.order-btn--delete:hover {
+  border-color: #c0392b !important;
+  color: #c0392b !important;
+}
+.order-btn--pay {
+  background: #8d4b00 !important;
+  box-shadow: none !important;
+}
+.order-btn--pay:hover {
+  background: #6e3900 !important;
+}
+.order-btn--finish {
+  background: #2d7d5a !important;
+  box-shadow: none !important;
+}
+.order-btn--finish:hover {
+  background: #235f44 !important;
 }

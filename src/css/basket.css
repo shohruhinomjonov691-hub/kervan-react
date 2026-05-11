@@ -1,0 +1,243 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap");
+
+.basket-page {
+  min-height: 80vh;
+  padding: 48px 0 80px;
+  background: #fcf9f8;
+}
+
+/* Empty */
+.basket-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+.basket-empty-title {
+  font-family: "Noto Serif", serif !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  color: #1c1b1b !important;
+  margin-bottom: 8px !important;
+}
+.basket-empty-sub {
+  font-size: 1rem !important;
+  color: #887364 !important;
+  margin-bottom: 28px !important;
+}
+.basket-empty-btn {
+  background: #8d4b00 !important;
+  border-radius: 999px !important;
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  padding: 12px 28px !important;
+}
+
+/* Header */
+.basket-header {
+  padding: 16px 0 36px;
+}
+.basket-title {
+  font-family: "Noto Serif", serif !important;
+  font-size: 2.25rem !important;
+  font-weight: 700 !important;
+  color: #1c1b1b !important;
+  margin-bottom: 6px !important;
+}
+.basket-sub {
+  font-size: 0.9375rem !important;
+  color: #887364 !important;
+}
+
+/* Items list */
+.basket-items-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Single item */
+.basket-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #fff;
+  border: 1px solid rgba(219, 194, 176, 0.3);
+  border-radius: 1rem;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(141, 75, 0, 0.04);
+}
+.basket-item-img-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.basket-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.basket-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.basket-item-name {
+  font-family: "Noto Serif", serif !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #1c1b1b !important;
+  margin-bottom: 4px !important;
+}
+.basket-item-price-unit {
+  font-size: 0.8125rem !important;
+  color: #887364 !important;
+}
+
+/* Qty control */
+.basket-qty {
+  border: 1px solid #e8d9cc;
+  border-radius: 0.625rem;
+  height: 40px;
+  overflow: hidden;
+}
+.basket-qty-btn {
+  border-radius: 0 !important;
+  color: #554336 !important;
+}
+.basket-qty-num {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1c1b1b;
+  min-width: 32px;
+  text-align: center;
+}
+
+/* Item total */
+.basket-item-total {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8d4b00;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Delete */
+.basket-delete-btn {
+  color: #dbc2b0 !important;
+  transition: color 0.2s !important;
+}
+.basket-delete-btn:hover {
+  color: #c0392b !important;
+}
+
+/* Summary card */
+.basket-summary {
+  width: 360px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid rgba(219, 194, 176, 0.3);
+  border-radius: 1.25rem;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(141, 75, 0, 0.07);
+  position: sticky;
+  top: 80px;
+}
+.basket-summary-title {
+  font-family: "Noto Serif", serif !important;
+  font-size: 1.375rem !important;
+  font-weight: 700 !important;
+  color: #1c1b1b !important;
+}
+.basket-summary-label {
+  font-size: 0.9375rem !important;
+  color: #887364 !important;
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.basket-summary-value {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  color: #1c1b1b !important;
+  font-family: "Be Vietnam Pro", sans-serif !important;
+}
+.basket-free-badge {
+  background: rgba(45, 125, 90, 0.1);
+  color: #2d7d5a;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+.basket-total-label {
+  font-family: "Noto Serif", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c1b1b;
+}
+.basket-total-value {
+  font-family: "Noto Serif", serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #8d4b00;
+}
+
+/* Checkout button */
+.basket-checkout-btn {
+  height: 56px !important;
+  border-radius: 999px !important;
+  background: #8d4b00 !important;
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  box-shadow: 0 6px 20px rgba(141, 75, 0, 0.25) !important;
+  letter-spacing: 0.01em !important;
+}
+.basket-checkout-btn:hover {
+  background: #6e3900 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Security note */
+.basket-security-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #faf7f4;
+  border: 1px solid rgba(219, 194, 176, 0.3);
+  border-radius: 0.625rem;
+  padding: 12px 14px;
+  margin-top: 14px;
+}
+.basket-security-text {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  color: #887364;
+  line-height: 1.5;
+}
+
+/* Delivery hint */
+.basket-delivery-hint {
+  background: rgba(141, 75, 0, 0.06);
+  border: 1px solid rgba(141, 75, 0, 0.15);
+  border-radius: 0.625rem;
+  padding: 10px 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+.basket-hint-text {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  color: #554336;
+}
