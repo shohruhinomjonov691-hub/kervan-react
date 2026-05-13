@@ -29,7 +29,7 @@ interface HomeNavbarProps {
 }
 
 export default function HomeNavbar(props: HomeNavbarProps) {
-  const { cartItems, setLoginOpen } = props;
+  const { cartItems, setLoginOpen, setSignupOpen } = props;
   const { authMember } = useGlobals();
   const history = useHistory();
   const [scrolled, setScrolled] = useState(false);
@@ -142,17 +142,6 @@ export default function HomeNavbar(props: HomeNavbarProps) {
             {/* User avatar OR Login */}
             {!authMember ? (
               <>
-                {/* Person icon */}
-                <IconButton
-                  sx={{
-                    color: scrolled ? "#1c1b1b" : "#ffffff",
-                    "&:hover": { background: "rgba(141,75,0,0.08)" },
-                  }}
-                  onClick={() => setLoginOpen(true)}
-                >
-                  <PersonOutlineIcon sx={{ fontSize: 22 }} />
-                </IconButton>
-
                 {/* Login button */}
                 <Button
                   variant="contained"
@@ -181,6 +170,35 @@ export default function HomeNavbar(props: HomeNavbarProps) {
                   }}
                 >
                   Login
+                </Button>
+                {/* Login button */}
+                <Button
+                  variant="contained"
+                  onClick={() => setSignupOpen(true)}
+                  sx={{
+                    height: 40,
+                    borderRadius: "999px",
+                    background: scrolled ? "#8d4b00" : "rgba(255,255,255,0.15)",
+                    border: scrolled
+                      ? "none"
+                      : "1.5px solid rgba(255,255,255,0.6)",
+                    backdropFilter: "blur(8px)",
+                    fontFamily: "'Be Vietnam Pro', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.875rem",
+                    textTransform: "none",
+                    px: 2.5,
+                    color: "#fff",
+                    boxShadow: "none",
+                    "&:hover": {
+                      background: scrolled
+                        ? "#6e3900"
+                        : "rgba(255,255,255,0.25)",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  Signup
                 </Button>
               </>
             ) : (

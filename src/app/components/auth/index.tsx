@@ -90,6 +90,10 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       setMemberNick("");
       setMemberPassword("");
     } catch (err) {
+      console.log(err);
+      handleLoginClose();
+      setMemberNick("");
+      setMemberPassword("");
       sweetErrorHandling(err).then();
     }
   };
@@ -107,6 +111,11 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       setMemberPhone("");
       setMemberPassword("");
     } catch (err) {
+      console.log(err);
+      handleLoginClose();
+      setMemberNick("");
+      setMemberPhone("");
+      setMemberPassword("");
       sweetErrorHandling(err).then();
     }
   };
@@ -138,7 +147,7 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
         justifyContent: "flex-end",
         position: "relative",
         overflow: "hidden",
-        backgroundImage: "url('/img/homeNavbar.png')",
+        backgroundImage: "url('/img/kervanImage.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: 500,

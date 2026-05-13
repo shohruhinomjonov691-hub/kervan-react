@@ -58,7 +58,7 @@ export default function Advertisement() {
       {/* ── CRAFT / VIDEO SECTION ── */}
       <div className="craft-frame">
         <img
-          src="/img/video-image.png"
+          src="/img/KervanVImage.jpeg"
           alt="Turkish Kitchen"
           className="craft-bg"
         />

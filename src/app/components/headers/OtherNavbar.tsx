@@ -29,7 +29,7 @@ interface OtherNavbarProps {
 }
 
 export default function OtherNavbar(props: OtherNavbarProps) {
-  const { cartItems, setLoginOpen } = props;
+  const { cartItems, setLoginOpen, setSignupOpen } = props;
   const { authMember } = useGlobals();
   const history = useHistory();
 
@@ -131,16 +131,6 @@ export default function OtherNavbar(props: OtherNavbarProps) {
             {/* User avatar OR Login */}
             {!authMember ? (
               <>
-                <IconButton
-                  sx={{
-                    color: "#1c1b1b",
-                    "&:hover": { background: "rgba(141,75,0,0.08)" },
-                  }}
-                  onClick={() => setLoginOpen(true)}
-                >
-                  <PersonOutlineIcon sx={{ fontSize: 22 }} />
-                </IconButton>
-
                 <Button
                   variant="contained"
                   onClick={() => setLoginOpen(true)}
@@ -159,24 +149,29 @@ export default function OtherNavbar(props: OtherNavbarProps) {
                 >
                   Login
                 </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => setSignupOpen(true)}
+                  sx={{
+                    height: 40,
+                    borderRadius: "999px",
+                    background: "#8d4b00",
+                    fontFamily: "'Be Vietnam Pro', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "0.875rem",
+                    textTransform: "none",
+                    px: 2.5,
+                    boxShadow: "none",
+                    "&:hover": { background: "#6e3900", boxShadow: "none" },
+                  }}
+                >
+                  Signup
+                </Button>
               </>
             ) : (
               /* Avatar → /member-page */
               <Stack direction="row" alignItems="center" spacing={1.5}>
                 {/* Profile label */}
-                <Box
-                  onClick={() => history.push("/member-page")}
-                  sx={{
-                    fontFamily: "'Be Vietnam Pro', sans-serif",
-                    fontSize: "0.875rem",
-                    fontWeight: 700,
-                    color: "#8d4b00",
-                    cursor: "pointer",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
-                  Profile
-                </Box>
                 <Box
                   component="img"
                   src={
