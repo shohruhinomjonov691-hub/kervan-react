@@ -90,6 +90,15 @@ export default function Hero() {
         guests: "2",
       });
     } catch (err) {
+      setBookOpen(false);
+      setForm({
+        name: "",
+        phone: "",
+        branch: "Itaewon",
+        date: "",
+        time: "",
+        guests: "2",
+      });
       sweetErrorHandling(err).then();
     } finally {
       setLoading(false);
