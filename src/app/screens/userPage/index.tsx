@@ -112,7 +112,7 @@ export default function UserPage() {
               onClick={handleLogout}
             >
               <LogoutIcon sx={{ fontSize: 20 }} />
-              <span>Sign Out</span>
+              <span>Log Out</span>
             </Box>
           </Box>
 
