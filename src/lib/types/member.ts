@@ -1,5 +1,20 @@
 import { MemberStatus, MemberType } from "../enums/member.enum";
 
+export interface MemberPayment {
+  cardBrand: string;
+  cardLast4: string;
+  cardHolder: string;
+  cardExpiry: string;
+}
+
+// Raw form input — validated server-side, never persisted or logged as-is
+export interface MemberPaymentInput {
+  cardNumber: string;
+  cardHolder: string;
+  cardExpiry: string;
+  cardCvv: string;
+}
+
 export interface Member {
   _id: string;
   memberType: MemberType;
@@ -11,6 +26,7 @@ export interface Member {
   memberDesc?: string;
   memberImage?: string;
   memberPoints: number;
+  memberPayment?: MemberPayment;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { createSelector } from "reselect";
 import { retrievePausedOrders } from "./selector";
 import { Order, OrderItem, OrderUpdateInput } from "../../../lib/types/order";
@@ -24,6 +25,7 @@ interface PausedOrdersProps {
 export default function PausedOrders({ setValue }: PausedOrdersProps) {
   const { authMember, setOrderBuilder } = useGlobals();
   const { pausedOrders } = useSelector(pausedRetriever);
+  const history = useHistory();
 
   const deleteOrderHandler = async (e: T) => {
     try {
@@ -44,6 +46,15 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
   const processOrderHandler = async (e: T) => {
     try {
       if (!authMember) throw new Error(Messages.error2);
+
+      if (!authMember.memberPayment) {
+        const goToPayments = window.confirm(
+          "No payment method saved. Add one now in your profile?",
+        );
+        if (goToPayments) history.push("/member-page?tab=payments");
+        return;
+      }
+
       const confirmed = window.confirm("Proceed with payment?");
       if (!confirmed) return;
       const input: OrderUpdateInput = {

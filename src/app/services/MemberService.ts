@@ -4,6 +4,7 @@ import {
   LoginInput,
   Member,
   MemberInput,
+  MemberPaymentInput,
   MemberUpdateInput,
 } from "../../lib/types/member";
 
@@ -115,6 +116,36 @@ class MemberService {
       return member;
     } catch (err) {
       console.log("Error updateMember:", err);
+      throw err;
+    }
+  }
+
+  public async savePaymentMethod(input: MemberPaymentInput): Promise<Member> {
+    try {
+      // ⚠️ karta raqami/CVV console'ga chiqarilmaydi
+      const url = `${serverApi}/member/payment`;
+      const result = await axios.post(url, input, { withCredentials: true });
+
+      const member: Member = result.data;
+      localStorage.setItem("memberData", JSON.stringify(member));
+      return member;
+    } catch (err) {
+      console.log("Error savePaymentMethod:", err);
+      throw err;
+    }
+  }
+
+  public async removePaymentMethod(): Promise<Member> {
+    try {
+      const url = `${serverApi}/member/payment/remove`;
+      const result = await axios.post(url, {}, { withCredentials: true });
+      console.log("removePaymentMethod:", result);
+
+      const member: Member = result.data;
+      localStorage.setItem("memberData", JSON.stringify(member));
+      return member;
+    } catch (err) {
+      console.log("Error removePaymentMethod:", err);
       throw err;
     }
   }

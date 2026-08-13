@@ -373,3 +373,40 @@
 .settings-save-btn:hover {
   background: #6e3900 !important;
 }
+
+/* ── PAYMENT METHOD ── */
+.pm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 24px 12px;
+  background: #faf7f4;
+  border: 1px dashed #e8d9cc;
+  border-radius: 0.875rem;
+}
+.pm-empty-text {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.8125rem !important;
+  color: #887364 !important;
+  line-height: 1.6 !important;
+}
+.pm-disclaimer {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.75rem !important;
+  color: #a08070 !important;
+  line-height: 1.5 !important;
+}
+.pm-remove-btn {
+  color: #c0392b !important;
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  border-radius: 999px !important;
+  white-space: nowrap;
+}
+.pm-remove-btn:hover {
+  background: rgba(192, 57, 43, 0.07) !important;
+}

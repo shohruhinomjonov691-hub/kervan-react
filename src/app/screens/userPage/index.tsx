@@ -16,7 +16,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import { useGlobals } from "../../hooks/useGlobals";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { serverApi } from "../../../lib/config";
 import { Order } from "../../../lib/types/order";
 import { OrderStatus } from "../../../lib/enums/order.enum";
@@ -27,6 +27,7 @@ import {
   sweetTopSmallSuccessAlert,
 } from "../../../lib/sweetAlert";
 import Settings from "./Settings";
+import PaymentMethod from "./PaymentMethod";
 import "../../../css/userPage.css";
 
 type SideTab = "profile" | "orders" | "payments";
@@ -34,7 +35,12 @@ type SideTab = "profile" | "orders" | "payments";
 export default function UserPage() {
   const { authMember, setAuthMember } = useGlobals();
   const history = useHistory();
-  const [activeTab, setActiveTab] = useState<SideTab>("profile");
+  const location = useLocation();
+  const initialTab: SideTab =
+    new URLSearchParams(location.search).get("tab") === "payments"
+      ? "payments"
+      : "profile";
+  const [activeTab, setActiveTab] = useState<SideTab>(initialTab);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [editMode, setEditMode] = useState(false);
 
@@ -287,66 +293,7 @@ export default function UserPage() {
                     <Typography className="up-card-title" sx={{ mb: 3 }}>
                       Payment Methods
                     </Typography>
-
-                    {/* Visa card */}
-                    <Box className="up-visa-card">
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Box className="up-visa-chip" />
-                        <Typography className="up-visa-network">
-                          VISA
-                        </Typography>
-                      </Stack>
-                      <Typography className="up-visa-number">
-                        •••• •••• •••• 4242
-                      </Typography>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-end"
-                      >
-                        <Box>
-                          <Typography className="up-visa-label">
-                            CARD HOLDER
-                          </Typography>
-                          <Typography className="up-visa-value">
-                            {authMember.memberNick}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography className="up-visa-label">
-                            EXPIRES
-                          </Typography>
-                          <Typography className="up-visa-value">
-                            12 / 26
-                          </Typography>
-                        </Box>
-                        <Box className="up-visa-type">VISA PLATINUM</Box>
-                      </Stack>
-                    </Box>
-
-                    {/* Kakao Pay */}
-                    <Box className="up-kakao-row">
-                      <Stack direction="row" alignItems="center" gap={2}>
-                        <Box className="up-kakao-icon">P</Box>
-                        <Box>
-                          <Typography className="up-kakao-title">
-                            Kakao Pay
-                          </Typography>
-                          <Typography className="up-kakao-sub">
-                            Auto-reload enabled
-                          </Typography>
-                        </Box>
-                      </Stack>
-                      <Typography
-                        sx={{ color: "#dbc2b0", fontSize: "1.25rem" }}
-                      >
-                        ›
-                      </Typography>
-                    </Box>
+                    <PaymentMethod />
                   </Box>
                 </Stack>
               </Stack>
@@ -440,63 +387,7 @@ export default function UserPage() {
                 <Typography className="up-card-title" sx={{ mb: 3 }}>
                   Payment Methods
                 </Typography>
-                <Stack gap={3}>
-                  {/* Visa */}
-                  <Box className="up-visa-card">
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Box className="up-visa-chip" />
-                      <Typography className="up-visa-network">VISA</Typography>
-                    </Stack>
-                    <Typography className="up-visa-number">
-                      •••• •••• •••• 4242
-                    </Typography>
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="flex-end"
-                    >
-                      <Box>
-                        <Typography className="up-visa-label">
-                          CARD HOLDER
-                        </Typography>
-                        <Typography className="up-visa-value">
-                          {authMember.memberNick}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography className="up-visa-label">
-                          EXPIRES
-                        </Typography>
-                        <Typography className="up-visa-value">
-                          12 / 26
-                        </Typography>
-                      </Box>
-                      <Box className="up-visa-type">VISA PLATINUM</Box>
-                    </Stack>
-                  </Box>
-
-                  {/* Kakao Pay */}
-                  <Box className="up-kakao-row">
-                    <Stack direction="row" alignItems="center" gap={2}>
-                      <Box className="up-kakao-icon">P</Box>
-                      <Box>
-                        <Typography className="up-kakao-title">
-                          Kakao Pay
-                        </Typography>
-                        <Typography className="up-kakao-sub">
-                          Auto-reload enabled
-                        </Typography>
-                      </Box>
-                    </Stack>
-                    <Typography sx={{ color: "#dbc2b0", fontSize: "1.25rem" }}>
-                      ›
-                    </Typography>
-                  </Box>
-                </Stack>
+                <PaymentMethod />
               </Box>
             )}
           </Box>
