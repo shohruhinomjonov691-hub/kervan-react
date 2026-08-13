@@ -138,6 +138,34 @@
   color: #c0392b !important;
 }
 
+/* Narrow screens: single row doesn't fit image+name+qty+total+delete —
+   wrap qty/total/delete onto their own row below the image+name */
+@media (max-width: 560px) {
+  .basket-item {
+    flex-wrap: wrap;
+    gap: 12px 16px;
+  }
+  .basket-item-img-wrap {
+    width: 64px;
+    height: 64px;
+  }
+  .basket-item-info {
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+  .basket-qty {
+    order: 3;
+  }
+  .basket-item-total {
+    order: 4;
+    min-width: 0;
+    margin-left: auto;
+  }
+  .basket-delete-btn {
+    order: 5;
+  }
+}
+
 /* Summary card */
 .basket-summary {
   width: 360px;
@@ -207,6 +235,12 @@
 .basket-checkout-btn:hover {
   background: #6e3900 !important;
   transform: translateY(-1px) !important;
+}
+.basket-checkout-btn.Mui-disabled {
+  background: #c4a582 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  opacity: 0.85;
 }
 
 /* Security note */

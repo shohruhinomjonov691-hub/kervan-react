@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -36,6 +36,11 @@ export default function BasketPage(props: BasketPageProps) {
   const { cartItems, onAdd, onRemove, onDelete, onDeleteAll } = props;
   const { authMember, setOrderBuilder } = useGlobals();
   const history = useHistory();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // useState yangilanishi asinxron — bir xil tick ichida ikki marta chaqirilsa
+  // ikkalasi ham eski (false) qiymatni ko'radi. Shu sabab haqiqiy qo'riqlash
+  // uchun darhol yangilanadigan ref ishlatiladi, useState esa faqat UI uchun
+  const isSubmittingRef = useRef(false);
 
   /* Price calculations */
   const subtotal = cartItems.reduce(
@@ -47,18 +52,33 @@ export default function BasketPage(props: BasketPageProps) {
 
   /* Proceed to checkout */
   const handleCheckout = async () => {
+    // ikki marta bosilganda ikkita buyurtma yaratilmasin — ref darhol
+    // yangilanadi, shuning uchun bir xil tick ichidagi ikkinchi chaqiruv ham to'xtatiladi
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
     try {
       if (!authMember) throw new Error(Messages.error2);
       if (cartItems.length === 0) throw new Error("Your basket is empty!");
 
+      // localStorage qo'lda o'zgartirilgan bo'lishi mumkin — 0/manfiy miqdorli
+      // bandlarni yubormaymiz (yakuniy narx/miqdor baribir backendda tekshiriladi)
+      const validItems = cartItems.filter(
+        (item) => Number.isInteger(item.quantity) && item.quantity > 0,
+      );
+      if (validItems.length === 0) throw new Error("Your basket is empty!");
+
       const order = new OrderService();
-      await order.createOrder(cartItems);
+      await order.createOrder(validItems);
       onDeleteAll();
       setOrderBuilder(new Date());
       await sweetTopSmallSuccessAlert("Order placed! 🎉", 1200);
       history.push("/orders");
     } catch (err) {
       sweetErrorHandling(err).then();
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -255,9 +275,10 @@ export default function BasketPage(props: BasketPageProps) {
               variant="contained"
               className="basket-checkout-btn"
               onClick={handleCheckout}
+              disabled={isSubmitting}
               sx={{ mt: 3 }}
             >
-              Proceed to Checkout →
+              {isSubmitting ? "Placing Order..." : "Proceed to Checkout →"}
             </Button>
 
             {/* Security note */}
