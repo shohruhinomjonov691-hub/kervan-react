@@ -1,14 +1,16 @@
 // src/app/services/TelegramService.ts
 import axios from "axios";
+import { serverApi } from "../../lib/config";
 
-const BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN;
-const CHAT_ID = process.env.REACT_APP_TELEGRAM_CHAT_ID;
-
+// Ilgari bu klass Telegram API'ga to'g'ridan-to'g'ri, bot tokenini
+// REACT_APP_ o'zgaruvchisidan o'qib chaqirar edi — CRA bunday o'zgaruvchilarni
+// build vaqtida bundle ichiga tekis joylashtiradi, ya'ni token har qanday
+// ziyoratchiga ochiq bo'lar edi. Endi backend orqali yuboriladi.
 class TelegramService {
-  private readonly apiUrl: string;
+  private readonly path: string;
 
   constructor() {
-    this.apiUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    this.path = serverApi;
   }
 
   public async sendBooking(input: {
@@ -19,16 +21,13 @@ class TelegramService {
     time: string;
     guests: number;
   }): Promise<void> {
-    const message =
-      `📅 <b>NEW RESERVATION</b>\n\n` +
-      `👤 <b>Name:</b> ${input.name}\n` +
-      `📞 <b>Phone:</b> ${input.phone}\n` +
-      `📍 <b>Branch:</b> ${input.branch}\n` +
-      `📆 <b>Date:</b> ${input.date}\n` +
-      `🕐 <b>Time:</b> ${input.time}\n` +
-      `👥 <b>Guests:</b> ${input.guests}`;
-
-    await this._send(message);
+    try {
+      const url = `${this.path}/contact/booking`;
+      await axios.post(url, input);
+    } catch (err) {
+      console.log("Error, sendBooking:", err);
+      throw err;
+    }
   }
 
   public async sendContact(input: {
@@ -36,24 +35,11 @@ class TelegramService {
     email: string;
     message: string;
   }): Promise<void> {
-    const message =
-      `📩 <b>NEW INQUIRY</b>\n\n` +
-      `👤 <b>Name:</b> ${input.name}\n` +
-      `📧 <b>Email:</b> ${input.email}\n` +
-      `💬 <b>Message:</b> ${input.message}`;
-
-    await this._send(message);
-  }
-
-  private async _send(text: string): Promise<void> {
     try {
-      await axios.post(this.apiUrl, {
-        chat_id: CHAT_ID,
-        text,
-        parse_mode: "HTML",
-      });
+      const url = `${this.path}/contact/inquiry`;
+      await axios.post(url, input);
     } catch (err) {
-      console.log("Telegram error:", err);
+      console.log("Error, sendContact:", err);
       throw err;
     }
   }

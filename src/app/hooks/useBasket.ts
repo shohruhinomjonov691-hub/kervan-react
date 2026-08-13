@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { CartItem } from "../../lib/types/search";
 
+const readStoredCart = (): CartItem[] => {
+  const cartJson = localStorage.getItem("cartData");
+  if (!cartJson) return [];
+  try {
+    return JSON.parse(cartJson);
+  } catch {
+    // Buzilgan cartData butun App'ni (mount vaqtida) crash qilib
+    // qo'ymasligi uchun bo'sh savatga qaytariladi
+    localStorage.removeItem("cartData");
+    return [];
+  }
+};
+
 const useBasket = () => {
-  const cartJson: string | null = localStorage.getItem("cartData");
-  const currentCart = cartJson ? JSON.parse(cartJson) : [];
-  const [cartItems, setCartItems] = useState<CartItem[]>(currentCart);
+  const [cartItems, setCartItems] = useState<CartItem[]>(readStoredCart());
 
   // incrementBy: mavjud savat qatoriga qancha qo'shilsin. Basket/Basket sahifasidagi
   // "+" tugmasi o'zining joriy qatorini o'zgarmas 1'ga oshirish uchun chaqiradi

@@ -7,10 +7,21 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const cookies = new Cookies();
   if (!cookies.get("accessToken")) localStorage.removeItem("memberData");
 
+  // memberData qo'lda buzilgan bo'lsa JSON.parse xato tashlab butun App'ni
+  // (ContextProvider daraxtning ildizida) render qilishdan to'xtatib qo'yardi
+  const readStoredMember = (): Member | null => {
+    const raw = localStorage.getItem("memberData");
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      localStorage.removeItem("memberData");
+      return null;
+    }
+  };
+
   const [authMember, setAuthMember] = useState<Member | null>(
-    localStorage.getItem("memberData")
-      ? JSON.parse(localStorage.getItem("memberData") as string)
-      : null,
+    readStoredMember(),
   );
   const [orderBuilder, setOrderBuilder] = useState<Date>(new Date());
   console.log("=== verify ===");

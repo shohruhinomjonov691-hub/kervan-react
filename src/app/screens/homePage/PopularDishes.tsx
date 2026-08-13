@@ -63,6 +63,9 @@ export default function PopularDishes() {
                         src={imagePath}
                         alt={product.productName}
                         className="sig-card-img"
+                        onError={(e: any) => {
+                          e.target.src = "/img/homeNavbar.png";
+                        }}
                       />
                       {/* Views badge */}
                       <Box className="sig-card-views">

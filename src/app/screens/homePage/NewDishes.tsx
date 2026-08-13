@@ -57,6 +57,9 @@ export default function NewDishes() {
                         src={imagePath}
                         alt={product.productName}
                         className="new-card-img"
+                        onError={(e: any) => {
+                          e.target.src = "/img/homeNavbar.png";
+                        }}
                       />
                     </Box>
 

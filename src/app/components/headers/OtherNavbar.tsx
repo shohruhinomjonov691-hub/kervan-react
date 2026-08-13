@@ -69,8 +69,20 @@ export default function OtherNavbar(props: OtherNavbarProps) {
             </Box>
           </NavLink>
 
-          {/* Center links */}
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          {/* Center links — narrow viewports: scrolls within its own strip
+              instead of pushing the navbar into page-level horizontal overflow */}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.5}
+            sx={{
+              overflowX: "auto",
+              flexShrink: 1,
+              minWidth: 0,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
             {[
               { label: "Home", to: "/", exact: true },
               { label: "Products", to: "/products" },
@@ -96,6 +108,8 @@ export default function OtherNavbar(props: OtherNavbarProps) {
                   padding: "6px 14px",
                   borderRadius: 6,
                   transition: "color 0.2s",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
                 {link.label}
@@ -104,7 +118,12 @@ export default function OtherNavbar(props: OtherNavbarProps) {
           </Stack>
 
           {/* Right: basket + user/login */}
-          <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.5}
+            sx={{ flexShrink: 0 }}
+          >
             {/* Basket */}
             <IconButton
               onClick={() => history.push("/basket")}
@@ -142,7 +161,8 @@ export default function OtherNavbar(props: OtherNavbarProps) {
                     fontWeight: 700,
                     fontSize: "0.875rem",
                     textTransform: "none",
-                    px: 2.5,
+                    px: { xs: 1.5, sm: 2.5 },
+                    flexShrink: 0,
                     boxShadow: "none",
                     "&:hover": { background: "#6e3900", boxShadow: "none" },
                   }}
@@ -160,7 +180,8 @@ export default function OtherNavbar(props: OtherNavbarProps) {
                     fontWeight: 700,
                     fontSize: "0.875rem",
                     textTransform: "none",
-                    px: 2.5,
+                    px: { xs: 1.5, sm: 2.5 },
+                    flexShrink: 0,
                     boxShadow: "none",
                     "&:hover": { background: "#6e3900", boxShadow: "none" },
                   }}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Route, Switch, useLocation } from "react-router-dom";
 import HomePage from "./screens/homePage";
 import ProductsPage from "./screens/productsPage";
@@ -21,11 +21,20 @@ import "../css/footer.css";
 
 function App() {
   const location = useLocation();
-  const { setAuthMember } = useGlobals();
+  const { authMember, setAuthMember } = useGlobals();
   const { cartItems, onAdd, onRemove, onDelete, onDeleteAll } = useBasket();
 
   const [signOpen, setSignOpen] = useState<boolean>(false);
   const [loginOpen, setLoginOpen] = useState<boolean>(false);
+
+  // Basket cartData'si memberga bog'liq emas — shu qurilmada boshqa hisob
+  // kirsa avvalgi foydalanuvchining savati ko'rinib qolmasligi uchun,
+  // logout aniqlanganda (authMember true'dan null'ga o'tganda) tozalanadi
+  const prevAuthMemberRef = useRef(authMember);
+  useEffect(() => {
+    if (prevAuthMemberRef.current && !authMember) onDeleteAll();
+    prevAuthMemberRef.current = authMember;
+  }, [authMember]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSignupClose = () => setSignOpen(false);
   const handleLoginClose = () => setLoginOpen(false);
