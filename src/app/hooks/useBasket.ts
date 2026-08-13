@@ -6,14 +6,19 @@ const useBasket = () => {
   const currentCart = cartJson ? JSON.parse(cartJson) : [];
   const [cartItems, setCartItems] = useState<CartItem[]>(currentCart);
 
-  const onAdd = (input: CartItem) => {
+  // incrementBy: mavjud savat qatoriga qancha qo'shilsin. Basket/Basket sahifasidagi
+  // "+" tugmasi o'zining joriy qatorini o'zgarmas 1'ga oshirish uchun chaqiradi
+  // (default qiymat shu holatni buzmaydi); Product Detail esa tanlangan miqdorni
+  // aniq beradi — shu sabab avvalgi kod har doim +1 qilib, tanlangan miqdorni
+  // e'tiborsiz qoldirar edi
+  const onAdd = (input: CartItem, incrementBy: number = 1) => {
     const exist: any = cartItems.find(
       (item: CartItem) => item._id === input._id,
     );
     if (exist) {
       const cartUpdate = cartItems.map((item: CartItem) =>
         item._id === input._id
-          ? { ...exist, quantity: exist.quantity + 1 }
+          ? { ...exist, quantity: exist.quantity + incrementBy }
           : item,
       );
       setCartItems(cartUpdate);

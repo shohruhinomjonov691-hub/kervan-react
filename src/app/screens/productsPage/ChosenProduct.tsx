@@ -28,16 +28,22 @@ import { setChosenProduct, setRestaurant } from "./slice";
 import { retrieveChosenProduct, retrieveRestaurant } from "./selector";
 import { Product } from "../../../lib/types/product";
 import { Member } from "../../../lib/types/member";
+import { Comment } from "../../../lib/types/comment";
 import { useParams } from "react-router-dom";
 import ProductService from "../../services/ProductService";
 import MemberService from "../../services/MemberService";
-import { serverApi } from "../../../lib/config";
+import CommentService from "../../services/CommentService";
+import { serverApi, Messages } from "../../../lib/config";
 import { CartItem } from "../../../lib/types/search";
-import { sweetTopSmallSuccessAlert } from "../../../lib/sweetAlert";
+import {
+  sweetErrorHandling,
+  sweetTopSmallSuccessAlert,
+} from "../../../lib/sweetAlert";
 import { T } from "../../../lib/types/common";
+import { useGlobals } from "../../hooks/useGlobals";
 
 const actionDispatch = (dispatch: Dispatch) => ({
-  setChosenProduct: (data: Product) => dispatch(setChosenProduct(data)),
+  setChosenProduct: (data: Product | null) => dispatch(setChosenProduct(data)),
   setRestaurant: (data: Member) => dispatch(setRestaurant(data)),
 });
 
@@ -46,99 +52,138 @@ const chosenProductRetriever = createSelector(
   (chosenProduct) => ({ chosenProduct }),
 );
 
-interface Review {
-  id: number;
-  name: string;
-  rating: number;
-  text: string;
-  date: string;
-}
-
-const initialReviews: Review[] = [
-  {
-    id: 1,
-    name: "Min-ho Choi",
-    rating: 5,
-    text: "The lamb was incredibly tender. It's hard to find such authentic Turkish flavors in Seoul. The saffron rice was the perfect companion. Definitely ordering again!",
-    date: "October 24, 2024",
-  },
-  {
-    id: 2,
-    name: "Ji-won Kim",
-    rating: 5,
-    text: "Portion size is generous for the price. The presentation was exquisite — it felt like a luxury dining experience right at home.",
-    date: "October 18, 2024",
-  },
-];
+type PageStatus = "loading" | "ready" | "not-found";
 
 interface ChosenProductProps {
-  onAdd: (item: CartItem) => void;
+  onAdd: (item: CartItem, incrementBy?: number) => void;
 }
 
 export default function ChosenProduct(props: ChosenProductProps) {
   const { onAdd } = props;
   const { productId } = useParams<{ productId: string }>();
+  const { authMember } = useGlobals();
   const { setChosenProduct, setRestaurant } = actionDispatch(useDispatch());
   const { chosenProduct } = useSelector(chosenProductRetriever);
 
+  const [pageStatus, setPageStatus] = useState<PageStatus>("loading");
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
-  const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [reviewName, setReviewName] = useState("");
-  const [reviewText, setReviewText] = useState("");
-  const [reviewRating, setReviewRating] = useState(5);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentRating, setCommentRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
 
+  // productId o'zgarganda (boshqa mahsulotga o'tilganda) eskisi ko'rinib
+  // qolmasligi va yangisi qayta so'ralishi kerak — shu sabab productId
+  // dependency sifatida qo'shilgan (avval [] edi, hech qachon qayta olmasdi)
   useEffect(() => {
+    let cancelled = false;
+    setPageStatus("loading");
+    setChosenProduct(null);
+
     const product = new ProductService();
     product
       .getProduct(productId)
-      .then((data) => setChosenProduct(data))
-      .catch((err) => console.log(err));
+      .then((data) => {
+        if (cancelled) return;
+        setChosenProduct(data);
+        setPageStatus("ready");
+      })
+      .catch((err) => {
+        console.log(err);
+        if (!cancelled) setPageStatus("not-found");
+      });
 
     const member = new MemberService();
     member
       .getRestaurant()
       .then((data) => setRestaurant(data))
       .catch((err) => console.log(err));
-  }, []); // eslint-disable-line
 
-  if (!chosenProduct) return null;
+    const commentService = new CommentService();
+    setComments([]);
+    commentService
+      .getComments(productId)
+      .then((data) => {
+        if (!cancelled) setComments(data);
+      })
+      .catch((err) => console.log(err));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (pageStatus === "loading") {
+    return (
+      <div className="chosen-product">
+        <Container maxWidth="lg">
+          <Box className="cp-page-status">Loading product…</Box>
+        </Container>
+      </div>
+    );
+  }
+
+  if (pageStatus === "not-found" || !chosenProduct) {
+    return (
+      <div className="chosen-product">
+        <Container maxWidth="lg">
+          <Box className="cp-page-status">
+            <Typography className="cp-page-status-title">
+              Product not found
+            </Typography>
+            <Typography className="cp-page-status-text">
+              This dish may be paused or no longer available. Please browse
+              our full menu instead.
+            </Typography>
+          </Box>
+        </Container>
+      </div>
+    );
+  }
 
   const handleAddToBasket = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    onAdd({
-      _id: chosenProduct._id,
+    // Ikkinchi argument — agar mahsulot savatda allaqachon bo'lsa, tanlangan
+    // miqdor to'g'ri qo'shilishi uchun (avval har doim +1 bo'lib qolar edi)
+    onAdd(
+      {
+        _id: chosenProduct._id,
+        quantity,
+        name: chosenProduct.productName,
+        price: chosenProduct.productPrice,
+        image: chosenProduct.productImages[0],
+      },
       quantity,
-      name: chosenProduct.productName,
-      price: chosenProduct.productPrice,
-      image: chosenProduct.productImages[0],
-    });
+    );
     await sweetTopSmallSuccessAlert("Added to basket! 🛍️", 1000);
   };
 
-  const handleSubmitReview = () => {
-    if (!reviewName.trim() || !reviewText.trim()) return;
-    const newReview: Review = {
-      id: Date.now(),
-      name: reviewName,
-      rating: reviewRating,
-      text: reviewText,
-      date: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-    };
-    setReviews([newReview, ...reviews]);
-    setReviewName("");
-    setReviewText("");
-    setReviewRating(5);
+  const handleSubmitComment = async () => {
+    try {
+      if (!authMember) throw new Error(Messages.error2);
+      if (!commentText.trim()) throw new Error(Messages.error4);
+
+      const result = await new CommentService().createComment({
+        productId,
+        commentText: commentText.trim(),
+        commentRating,
+      });
+      setComments([result, ...comments]);
+      setCommentText("");
+      setCommentRating(5);
+      await sweetTopSmallSuccessAlert("Review posted! 🙏", 1000);
+    } catch (err) {
+      sweetErrorHandling(err).then();
+    }
   };
 
-  const avgRating = (
-    reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-  ).toFixed(1);
+  const avgRating =
+    comments.length > 0
+      ? (
+          comments.reduce((s, c) => s + c.commentRating, 0) / comments.length
+        ).toFixed(1)
+      : "0.0";
 
   return (
     <div className="chosen-product">
@@ -163,7 +208,7 @@ export default function ChosenProduct(props: ChosenProductProps) {
               {/* Rating badge top-right */}
               <Box className="cp-rating-badge">
                 <StarIcon sx={{ fontSize: 14, color: "#8d4b00" }} />
-                <span>4.8</span>
+                <span>{avgRating}</span>
               </Box>
 
               <Swiper
@@ -255,7 +300,10 @@ export default function ChosenProduct(props: ChosenProductProps) {
               {[1, 2, 3, 4, 5].map((s) => (
                 <StarIcon
                   key={s}
-                  sx={{ fontSize: 20, color: s <= 4 ? "#8d4b00" : "#dbc2b0" }}
+                  sx={{
+                    fontSize: 20,
+                    color: s <= Math.round(Number(avgRating)) ? "#8d4b00" : "#dbc2b0",
+                  }}
                 />
               ))}
               <Typography
@@ -266,7 +314,7 @@ export default function ChosenProduct(props: ChosenProductProps) {
                   ml: 0.5,
                 }}
               >
-                4.8 / 5.0
+                {avgRating} / 5.0
               </Typography>
             </Stack>
 
@@ -365,73 +413,94 @@ export default function ChosenProduct(props: ChosenProductProps) {
           </Stack>
 
           {/* Review cards */}
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            gap={3}
-            flexWrap="wrap"
-            sx={{ mb: 5 }}
-          >
-            {reviews.map((review) => (
-              <Box key={review.id} className="cp-review-card">
-                {/* Reviewer header */}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="flex-start"
-                  sx={{ mb: 1.5 }}
-                >
-                  <Stack direction="row" gap={1.5} alignItems="center">
-                    <Box className="cp-review-avatar">
-                      {review.name.charAt(0)}
-                    </Box>
-                    <Box>
-                      <Typography className="cp-review-name">
-                        {review.name}
-                      </Typography>
-                      <Stack direction="row" gap={0.3} sx={{ mt: 0.3 }}>
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <StarIcon
-                            key={s}
-                            sx={{
-                              fontSize: 13,
-                              color: s <= review.rating ? "#8d4b00" : "#e8d9cc",
-                            }}
-                          />
-                        ))}
+          {comments.length === 0 ? (
+            <Box className="cp-no-reviews">
+              No reviews yet — be the first to share your experience.
+            </Box>
+          ) : (
+            <Stack
+              direction={{ xs: "column", md: "row" }}
+              gap={3}
+              flexWrap="wrap"
+              sx={{ mb: 5 }}
+            >
+              {comments.map((comment) => {
+                const author = comment.memberData?.[0];
+                const authorName = author?.memberNick ?? "Guest";
+                return (
+                  <Box key={comment._id} className="cp-review-card">
+                    {/* Reviewer header */}
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      sx={{ mb: 1.5 }}
+                    >
+                      <Stack direction="row" gap={1.5} alignItems="center">
+                        <Box className="cp-review-avatar">
+                          {authorName.charAt(0).toUpperCase()}
+                        </Box>
+                        <Box>
+                          <Typography className="cp-review-name">
+                            {authorName}
+                          </Typography>
+                          <Stack direction="row" gap={0.3} sx={{ mt: 0.3 }}>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <StarIcon
+                                key={s}
+                                sx={{
+                                  fontSize: 13,
+                                  color:
+                                    s <= comment.commentRating
+                                      ? "#8d4b00"
+                                      : "#e8d9cc",
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Box>
                       </Stack>
-                    </Box>
-                  </Stack>
-                  <Chip
-                    label="VERIFIED GUEST"
-                    size="small"
-                    className="cp-verified-chip"
-                  />
-                </Stack>
+                      <Chip
+                        label="VERIFIED GUEST"
+                        size="small"
+                        className="cp-verified-chip"
+                      />
+                    </Stack>
 
-                {/* Review text */}
-                <Typography className="cp-review-text">
-                  "{review.text}"
-                </Typography>
-                <Typography className="cp-review-date">
-                  {review.date}
-                </Typography>
-              </Box>
-            ))}
-          </Stack>
+                    {/* Review text */}
+                    <Typography className="cp-review-text">
+                      "{comment.commentText}"
+                    </Typography>
+                    <Typography className="cp-review-date">
+                      {new Date(comment.createdAt).toLocaleDateString(
+                        "en-US",
+                        { year: "numeric", month: "long", day: "numeric" },
+                      )}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Stack>
+          )}
 
           {/* Write Review form */}
           <Box className="cp-write-review">
             <Typography className="cp-write-title">Write a Review</Typography>
+            {authMember && (
+              <Typography className="cp-write-as">
+                Posting as {authMember.memberNick}
+              </Typography>
+            )}
 
             {/* Star picker */}
             <Stack direction="row" gap={0.5} sx={{ mb: 2.5, mt: 1.5 }}>
               {[1, 2, 3, 4, 5].map((s) => {
-                const filled = s <= (hoverRating || reviewRating);
+                const filled = s <= (hoverRating || commentRating);
                 return filled ? (
                   <StarIcon
                     key={s}
                     className="cp-star-pick"
-                    onClick={() => setReviewRating(s)}
+                    onClick={() => setCommentRating(s)}
                     onMouseEnter={() => setHoverRating(s)}
                     onMouseLeave={() => setHoverRating(0)}
                     sx={{ fontSize: 30, color: "#8d4b00", cursor: "pointer" }}
@@ -440,7 +509,7 @@ export default function ChosenProduct(props: ChosenProductProps) {
                   <StarBorderIcon
                     key={s}
                     className="cp-star-pick"
-                    onClick={() => setReviewRating(s)}
+                    onClick={() => setCommentRating(s)}
                     onMouseEnter={() => setHoverRating(s)}
                     onMouseLeave={() => setHoverRating(0)}
                     sx={{ fontSize: 30, color: "#dbc2b0", cursor: "pointer" }}
@@ -452,25 +521,17 @@ export default function ChosenProduct(props: ChosenProductProps) {
             <Stack gap={2}>
               <TextField
                 fullWidth
-                size="small"
-                label="Your Name"
-                value={reviewName}
-                onChange={(e: T) => setReviewName(e.target.value)}
-                sx={fieldSx}
-              />
-              <TextField
-                fullWidth
                 multiline
                 rows={4}
                 label="Share your experience..."
-                value={reviewText}
-                onChange={(e: T) => setReviewText(e.target.value)}
+                value={commentText}
+                onChange={(e: T) => setCommentText(e.target.value)}
                 sx={fieldSx}
               />
               <Button
                 variant="contained"
                 className="cp-submit-btn"
-                onClick={handleSubmitReview}
+                onClick={handleSubmitComment}
                 sx={{ alignSelf: "flex-start" }}
               >
                 Post Review

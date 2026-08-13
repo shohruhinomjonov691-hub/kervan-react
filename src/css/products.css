@@ -1026,6 +1026,50 @@
   color: #1c1b1b !important;
 }
 
+.cp-write-as {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.8125rem !important;
+  color: #887364 !important;
+  margin-top: 4px !important;
+}
+
+.cp-no-reviews {
+  width: 100%;
+  padding: 40px 0;
+  margin-bottom: 32px;
+  text-align: center;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.9375rem;
+  color: #a08070;
+}
+
+/* Whole-page loading / not-found state */
+.cp-page-status {
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 0;
+  font-family: "Be Vietnam Pro", sans-serif;
+  color: #887364;
+}
+
+.cp-page-status-title {
+  font-family: "Noto Serif", serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #1c1b1b !important;
+  margin-bottom: 8px !important;
+}
+
+.cp-page-status-text {
+  font-size: 0.9375rem !important;
+  color: #887364 !important;
+  max-width: 380px;
+}
+
 .cp-submit-btn {
   background: #8d4b00 !important;
   border-radius: 999px !important;
