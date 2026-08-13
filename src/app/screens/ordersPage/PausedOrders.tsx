@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -26,24 +26,34 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
   const { authMember, setOrderBuilder } = useGlobals();
   const { pausedOrders } = useSelector(pausedRetriever);
   const history = useHistory();
+  // Bitta order ustida bir vaqtda faqat bitta transition so'rovi ketishi
+  // uchun — tez-tez bosilganda takroriy Pay/Cancel so'rov yubormaslik
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const deleteOrderHandler = async (e: T) => {
+    const orderId = e.target.value;
+    if (processingId) return;
     try {
       if (!authMember) throw new Error(Messages.error2);
       const confirmed = window.confirm("Delete this order?");
       if (!confirmed) return;
+      setProcessingId(orderId);
       const input: OrderUpdateInput = {
-        orderId: e.target.value,
+        orderId,
         orderStatus: OrderStatus.DELETE,
       };
       await new OrderService().updateOrders(input);
       setOrderBuilder(new Date());
     } catch (err) {
       sweetErrorHandling(err).then();
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const processOrderHandler = async (e: T) => {
+    const orderId = e.target.value;
+    if (processingId) return;
     try {
       if (!authMember) throw new Error(Messages.error2);
 
@@ -57,8 +67,9 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
 
       const confirmed = window.confirm("Proceed with payment?");
       if (!confirmed) return;
+      setProcessingId(orderId);
       const input: OrderUpdateInput = {
-        orderId: e.target.value,
+        orderId,
         orderStatus: OrderStatus.PROCESS,
       };
       await new OrderService().updateOrders(input);
@@ -66,6 +77,8 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
       setOrderBuilder(new Date());
     } catch (err) {
       sweetErrorHandling(err).then();
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -93,6 +106,13 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
             <Box>
               <Typography className="order-card-id">
                 #{String(order._id).slice(-8).toUpperCase()}
+              </Typography>
+              <Typography className="order-card-date">
+                {new Date(order.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </Typography>
             </Box>
             <Chip
@@ -162,6 +182,7 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
                 size="small"
                 value={String(order._id)}
                 onClick={deleteOrderHandler}
+                disabled={processingId === String(order._id)}
                 className="order-btn order-btn--delete"
               >
                 Cancel
@@ -171,9 +192,10 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
                 size="small"
                 value={String(order._id)}
                 onClick={processOrderHandler}
+                disabled={processingId === String(order._id)}
                 className="order-btn order-btn--pay"
               >
-                Pay Now
+                {processingId === String(order._id) ? "Processing…" : "Pay Now"}
               </Button>
             </Stack>
           </Stack>

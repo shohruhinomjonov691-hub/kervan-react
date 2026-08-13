@@ -90,6 +90,12 @@
   color: #554336;
   letter-spacing: 0.05em;
 }
+.order-card-date {
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.75rem;
+  color: #887364;
+  margin-top: 2px;
+}
 
 /* Status chips */
 .status-chip {

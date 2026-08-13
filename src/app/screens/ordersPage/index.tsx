@@ -24,22 +24,28 @@ export default function OrdersPage() {
     actionDispatch(useDispatch());
   const { authMember, orderBuilder } = useGlobals();
   const [tabValue, setTabValue] = useState("1");
+  // Birinchi fetch tugamasdan turib "No pending orders" bo'sh holati bir lahza
+  // ko'rinib ketmasligi uchun — ChosenProduct.tsx dagi pageStatus patterni bilan bir xil
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!authMember) return;
+    setIsLoading(true);
     const order = new OrderService();
-    order
-      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PAUSE })
-      .then((data) => setPausedOrders(data))
-      .catch((err) => sweetErrorHandling(err));
-    order
-      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PROCESS })
-      .then((data) => setProcessOrders(data))
-      .catch((err) => sweetErrorHandling(err));
-    order
-      .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.FINISH })
-      .then((data) => setFinishedOrders(data))
-      .catch((err) => sweetErrorHandling(err));
+    Promise.all([
+      order
+        .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PAUSE })
+        .then((data) => setPausedOrders(data))
+        .catch((err) => sweetErrorHandling(err)),
+      order
+        .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.PROCESS })
+        .then((data) => setProcessOrders(data))
+        .catch((err) => sweetErrorHandling(err)),
+      order
+        .getMyOrders({ page: 1, limit: 5, orderStatus: OrderStatus.FINISH })
+        .then((data) => setFinishedOrders(data))
+        .catch((err) => sweetErrorHandling(err)),
+    ]).finally(() => setIsLoading(false));
   }, [authMember, orderBuilder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!authMember) {
@@ -79,9 +85,19 @@ export default function OrdersPage() {
           </Tabs>
         </Box>
 
-        {tabValue === "1" && <PausedOrders setValue={setTabValue} />}
-        {tabValue === "2" && <ProcessOrders setValue={setTabValue} />}
-        {tabValue === "3" && <FinishedOrders />}
+        {isLoading ? (
+          <Box className="orders-empty">
+            <Typography className="orders-empty-text">
+              Loading your orders…
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            {tabValue === "1" && <PausedOrders setValue={setTabValue} />}
+            {tabValue === "2" && <ProcessOrders setValue={setTabValue} />}
+            {tabValue === "3" && <FinishedOrders />}
+          </>
+        )}
       </Container>
     </div>
   );

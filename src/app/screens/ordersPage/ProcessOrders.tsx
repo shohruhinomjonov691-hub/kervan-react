@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
@@ -24,14 +24,18 @@ interface ProcessOrdersProps {
 export default function ProcessOrders({ setValue }: ProcessOrdersProps) {
   const { authMember, setOrderBuilder } = useGlobals();
   const { processOrders } = useSelector(processRetriever);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const finishOrderHandler = async (e: T) => {
+    const orderId = e.target.value;
+    if (processingId) return;
     try {
       if (!authMember) throw new Error(Messages.error2);
       const confirmed = window.confirm("Have you received your order?");
       if (!confirmed) return;
+      setProcessingId(orderId);
       const input: OrderUpdateInput = {
-        orderId: e.target.value,
+        orderId,
         orderStatus: OrderStatus.FINISH,
       };
       await new OrderService().updateOrders(input);
@@ -39,6 +43,8 @@ export default function ProcessOrders({ setValue }: ProcessOrdersProps) {
       setOrderBuilder(new Date());
     } catch (err) {
       sweetErrorHandling(err).then();
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -62,9 +68,18 @@ export default function ProcessOrders({ setValue }: ProcessOrdersProps) {
             alignItems="center"
             className="order-card-header"
           >
-            <Typography className="order-card-id">
-              #{String(order._id).slice(-8).toUpperCase()}
-            </Typography>
+            <Box>
+              <Typography className="order-card-id">
+                #{String(order._id).slice(-8).toUpperCase()}
+              </Typography>
+              <Typography className="order-card-date">
+                {new Date(order.createdAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </Typography>
+            </Box>
             <Chip
               label="Processing"
               size="small"
@@ -124,9 +139,12 @@ export default function ProcessOrders({ setValue }: ProcessOrdersProps) {
               size="small"
               value={String(order._id)}
               onClick={finishOrderHandler}
+              disabled={processingId === String(order._id)}
               className="order-btn order-btn--finish"
             >
-              Mark as Received
+              {processingId === String(order._id)
+                ? "Processing…"
+                : "Mark as Received"}
             </Button>
           </Stack>
         </Box>

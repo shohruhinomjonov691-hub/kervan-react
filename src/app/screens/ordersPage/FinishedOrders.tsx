@@ -38,9 +38,18 @@ export default function FinishedOrders() {
           >
             <Stack direction="row" alignItems="center" gap={1}>
               <CheckCircleOutlineIcon sx={{ fontSize: 18, color: "#2d7d5a" }} />
-              <Typography className="order-card-id">
-                #{String(order._id).slice(-8).toUpperCase()}
-              </Typography>
+              <Box>
+                <Typography className="order-card-id">
+                  #{String(order._id).slice(-8).toUpperCase()}
+                </Typography>
+                <Typography className="order-card-date">
+                  {new Date(order.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </Typography>
+              </Box>
             </Stack>
             <Chip
               label="Delivered"

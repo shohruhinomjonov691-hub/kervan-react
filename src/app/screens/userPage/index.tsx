@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
@@ -28,12 +29,18 @@ import {
 } from "../../../lib/sweetAlert";
 import Settings from "./Settings";
 import PaymentMethod from "./PaymentMethod";
+import {
+  setPausedOrders,
+  setProcessOrders,
+  setFinishedOrders,
+} from "../ordersPage/slice";
 import "../../../css/userPage.css";
 
 type SideTab = "profile" | "orders" | "payments";
 
 export default function UserPage() {
   const { authMember, setAuthMember } = useGlobals();
+  const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation();
   const initialTab: SideTab =
@@ -62,6 +69,12 @@ export default function UserPage() {
     try {
       await new MemberService().logout();
       setAuthMember(null);
+      // ordersPage redux slice logout'da tozalanmasa, keyingi (boshqa)
+      // foydalanuvchi /orders'ga kirganda avvalgi hisobning buyurtmalari
+      // yangi fetch tugamaguncha bir lahza ko'rinib ketishi mumkin edi
+      dispatch(setPausedOrders([]));
+      dispatch(setProcessOrders([]));
+      dispatch(setFinishedOrders([]));
       await sweetTopSmallSuccessAlert("Logged out!", 700);
       history.push("/");
     } catch (err) {
