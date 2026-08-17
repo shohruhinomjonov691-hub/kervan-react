@@ -8,8 +8,9 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./app/MaterialTheme";
 import { BrowserRouter as Router } from "react-router-dom";
-import "./css/index.css";
 import ContextProvider from "./app/context/ContextProvider";
+import { SocketProvider } from "./app/context/SocketContext";
+import "./css/index.css";
 
 // GLOBAL INTEGRATION > MUI , REDUX, ROUTER, Socket.io, Context WebSocket ReactiveVariable Apollo ReactQuery ...
 const container = document.getElementById("root")!;
@@ -23,14 +24,16 @@ root.render(
     {/* PARENT: REDUX -malumot saqlaydigon Bunker */}
     <Provider store={store}>
       <ContextProvider>
-        {/* PARENT: MUI */}
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {/* PARENT:  ROUTER */}
-          <Router>
-            <App />
-          </Router>
-        </ThemeProvider>
+        <SocketProvider>
+          {/* PARENT: MUI */}
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {/* PARENT:  ROUTER */}
+            <Router>
+              <App />
+            </Router>
+          </ThemeProvider>
+        </SocketProvider>
       </ContextProvider>
     </Provider>
   </React.StrictMode>,
