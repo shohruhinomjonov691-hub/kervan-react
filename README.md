@@ -1,46 +1,72 @@
-# Getting Started with Create React App
+# Kervan · Restaurant Web Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) TS template.
+A restaurant frontend that connects menu discovery, a shopping basket, customer orders, and branch information in one application. Kervan is my second major full-stack project; this repository contains its React client.
 
-## Available Scripts
+[Backend repository](https://github.com/shohruhinomjonov691-hub/kervan) · [Application](http://kervan.uz/)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Browse dishes with search, collection filters, sorting, and pagination.
+- Open individual dishes and add items to a basket with quantity controls.
+- Create orders and review paused, processing, and completed orders.
+- Register, sign in, and update account details and profile images.
+- Browse restaurant branches and submit reservation requests and customer inquiries through the backend's Telegram relay.
+- Read and submit customer comments.
+- Explore popular dishes, new dishes, restaurant statistics, and active users on the home page.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Technology
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+React 18, TypeScript, Redux Toolkit, React Router, Material UI, Axios, Socket.IO client, styled-components, and Swiper. The application uses Create React App through `react-scripts`.
 
-### `npm test`
+## Architecture
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```text
+React screens → service classes / Axios → Kervan REST API → MongoDB
+      ↓
+Redux Toolkit slices and selectors
+```
 
-### `npm run build`
+Screens live in [`src/app/screens`](src/app/screens), API access is organized in [`src/app/services`](src/app/services), and shared configuration and types live in [`src/lib`](src/lib). Context providers handle application-wide member/socket state.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Run locally
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Start the [Kervan backend](https://github.com/shohruhinomjonov691-hub/kervan) first. Use a Node.js runtime compatible with `react-scripts` and the backend; Node.js 20 matches the setup described here.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+git clone --branch develop https://github.com/shohruhinomjonov691-hub/kervan-react.git
+cd kervan-react
+npm install
+```
 
-### `npm run eject`
+Create `.env` in the repository root:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```dotenv
+REACT_APP_API_URL=http://localhost:3003
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Open `http://localhost:3000`. Set the backend's `FRONTEND_URL` to this same origin so credentialed requests work. `REACT_APP_` variables are included in the browser bundle; keep API keys and Telegram credentials on the backend.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Scripts
 
-## Learn More
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Development server |
+| `npm run build` | Production assets in `build/` |
+| `npm test` | React test runner |
+| `npm run start:prod` | Serve the build on port 3000; requires `serve` to be installed separately |
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Environment values are embedded at build time. Configure the deployed API URL before building, and configure the hosting server to return `index.html` for client-side routes.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Project scope
+
+The payment-method screen is a **demo flow**. It validates card-shaped inputs and stores masked card metadata through the backend, but it does not charge a card or integrate a payment processor. Use synthetic demo values only.
+
+This is a completed portfolio application. The repository contains a starter test, rather than a comprehensive automated test suite; availability of a test command should not be interpreted as verified coverage of every user flow.
+
+## Author
+
+[Shokhrukhbek Inomjonov](https://github.com/shohruhinomjonov691-hub)
