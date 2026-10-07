@@ -42,6 +42,14 @@ class MemberService {
     }
   }
 
+  // Sahifa yangilanganda auth'ni cookie orqali serverdan tiklash uchun.
+  // localStorage'ga yozish ContextProvider'da — u 401/5xx farqini hal qiladi
+  public async getMemberDetail(): Promise<Member> {
+    const url = this.path + "/member/detail";
+    const result = await axios.get(url, { withCredentials: true });
+    return result.data;
+  }
+
   public async signup(input: MemberInput): Promise<Member> {
     try {
       const url = this.path + "/member/signup";
