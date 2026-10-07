@@ -51,6 +51,7 @@ const stored = () => localStorage.getItem("memberData");
 beforeEach(() => {
   localStorage.clear();
   document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  mockedAxios.mockReset();
   mockedAxios.get.mockReset();
   mockedAxios.post.mockReset();
 });
@@ -140,4 +141,73 @@ test("cookie bor, memberData yo'q: logout'dan keyin eski restore 200 userni tikl
   await flush();
   expect(getByTestId("nick").textContent).toBe("guest");
   expect(stored()).toBeNull();
+});
+
+/* ── Restore → karta/profil yangilanishi poygasi (member-data revision) ── */
+
+let globals: ReturnType<typeof useGlobals>;
+const GlobalsProbe = () => {
+  globals = useGlobals();
+  return (
+    <div data-testid="last4">{globals.authMember?.memberPayment?.cardLast4 ?? "none"}</div>
+  );
+};
+
+const withCard = { ...memberA, memberPayment: { cardBrand: "DEMO", cardLast4: "7777", cardHolder: "ali", cardExpiry: "12/39" } };
+
+test.each<[string, () => Promise<any>, () => void]>([
+  [
+    "generate",
+    () => new MemberService().generatePaymentMethod(),
+    () => mockedAxios.post.mockResolvedValueOnce({ data: withCard }),
+  ],
+  [
+    "save",
+    () => new MemberService().savePaymentMethod({ cardHolder: "ali", cardExpiry: "12/39" }),
+    () => mockedAxios.post.mockResolvedValueOnce({ data: withCard }),
+  ],
+  [
+    "profil yangilanishi",
+    () => new MemberService().updateMember({ memberNick: "ali" }),
+    () => mockedAxios.mockResolvedValueOnce({ data: withCard }),
+  ],
+])(
+  "restore kutilayotganda %s tugasa — eski restore 200 yangi ma'lumotni bosmaydi",
+  async (_label, update, mockResponse) => {
+    localStorage.setItem("memberData", JSON.stringify(memberA));
+    const restore = deferred<any>();
+    mockedAxios.get.mockReturnValue(restore.promise);
+
+    const { getByTestId } = render(
+      <ContextProvider>
+        <GlobalsProbe />
+      </ContextProvider>,
+    );
+
+    mockResponse();
+    await act(async () => {
+      globals.setAuthMember(await update()); // komponentlardagidek
+    });
+    expect(getByTestId("last4").textContent).toBe("7777");
+
+    // Restore'ning kartasiz eski snapshot'i keyinroq keladi
+    restore.resolve({ data: memberA });
+    await flush();
+    expect(getByTestId("last4").textContent).toBe("7777");
+    expect(JSON.parse(stored() as string).memberPayment.cardLast4).toBe("7777");
+  },
+);
+
+test("restore kutilayotganda yozuv bo'lmasa — restore 200 odatdagidek qo'llanadi", async () => {
+  localStorage.setItem("memberData", JSON.stringify(memberA));
+  const restore = deferred<any>();
+  mockedAxios.get.mockReturnValue(restore.promise);
+  const { getByTestId } = render(
+    <ContextProvider>
+      <GlobalsProbe />
+    </ContextProvider>,
+  );
+  restore.resolve({ data: withCard });
+  await flush();
+  expect(getByTestId("last4").textContent).toBe("7777");
 });

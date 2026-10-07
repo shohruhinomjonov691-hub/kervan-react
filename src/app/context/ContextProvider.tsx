@@ -7,6 +7,7 @@ import {
   beginAuthChange,
   clearStoredMember,
   getAuthGeneration,
+  getMemberRevision,
   isCurrentGeneration,
   readStoredMember,
   storeMember,
@@ -39,10 +40,16 @@ const ContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     if (!readStoredMember() && !hasCookie) return; // anonim mehmon
 
     // So'rov davomida login/signup/logout boshlansa generation o'zgaradi va
-    // bu javob (hatto bir xil userga qayta login bo'lsa ham) e'tiborsiz qoladi
+    // bu javob (hatto bir xil userga qayta login bo'lsa ham) e'tiborsiz qoladi.
+    // Revision esa shu sessiya ichidagi yangiroq yozuvlarni (karta, profil)
+    // eski restore ma'lumoti bosib ketishidan saqlaydi
     const gen = getAuthGeneration();
+    const revision = getMemberRevision();
     let cancelled = false;
-    const isStale = () => cancelled || !isCurrentGeneration(gen);
+    const isStale = () =>
+      cancelled ||
+      !isCurrentGeneration(gen) ||
+      getMemberRevision() !== revision;
 
     new MemberService()
       .getMemberDetail()

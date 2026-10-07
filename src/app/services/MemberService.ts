@@ -13,8 +13,10 @@ import {
   clearStoredMember,
   commitMemberUpdate,
   isCurrentGeneration,
+  isTicketCurrent,
   storeMember,
   takeSessionTicket,
+  toSessionError,
 } from "../context/authSession";
 
 class MemberService {
@@ -75,7 +77,7 @@ class MemberService {
       return member;
     } catch (err) {
       console.log("Error signup:", err);
-      throw err;
+      throw toSessionError(isCurrentGeneration(gen), err);
     }
   }
 
@@ -94,7 +96,7 @@ class MemberService {
       return member;
     } catch (err) {
       console.log("Error login:", err);
-      throw err;
+      throw toSessionError(isCurrentGeneration(gen), err);
     }
   }
 
@@ -139,7 +141,7 @@ class MemberService {
       return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error updateMember:", err);
-      throw err;
+      throw toSessionError(isTicketCurrent(ticket), err);
     }
   }
 
@@ -152,7 +154,7 @@ class MemberService {
       return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error savePaymentMethod:", err);
-      throw err;
+      throw toSessionError(isTicketCurrent(ticket), err);
     }
   }
 
@@ -165,7 +167,7 @@ class MemberService {
       return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error generatePaymentMethod:", err);
-      throw err;
+      throw toSessionError(isTicketCurrent(ticket), err);
     }
   }
 
@@ -179,7 +181,7 @@ class MemberService {
       return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error removePaymentMethod:", err);
-      throw err;
+      throw toSessionError(isTicketCurrent(ticket), err);
     }
   }
 }

@@ -9,6 +9,10 @@ import { Member } from "../../lib/types/member";
 
 const STORAGE_KEY = "memberData";
 let generation = 0;
+// memberData har safar yozilganda/o'chirilganda oshadi. Sessiya o'zgarmasa
+// ham (masalan, restore kutilayotganda karta yaratildi) eski restore javobi
+// yangiroq ma'lumotni bosib ketmasligi uchun
+let memberRevision = 0;
 
 export class StaleSessionError extends Error {
   constructor() {
@@ -24,6 +28,8 @@ export const getAuthGeneration = (): number => generation;
 
 export const isCurrentGeneration = (gen: number): boolean =>
   gen === generation;
+
+export const getMemberRevision = (): number => memberRevision;
 
 // login/signup/logout boshlanishida va server sessiyani rad etganda
 export const beginAuthChange = (): number => ++generation;
@@ -42,10 +48,12 @@ export const readStoredMember = (): Member | null => {
 };
 
 export const storeMember = (member: Member): void => {
+  memberRevision++;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(member));
 };
 
 export const clearStoredMember = (): void => {
+  memberRevision++;
   localStorage.removeItem(STORAGE_KEY);
 };
 
@@ -66,6 +74,11 @@ export const isTicketCurrent = (ticket: SessionTicket): boolean =>
   isCurrentGeneration(ticket.generation) &&
   ticket.memberId !== null &&
   readStoredMember()?._id === ticket.memberId;
+
+// Xato javoblari uchun: so'rov eskirgan sessiyaga tegishli bo'lsa, asl xato
+// o'rniga StaleSessionError — caller alert/modal/input'ga tegmasligi uchun
+export const toSessionError = (isCurrent: boolean, err: unknown): unknown =>
+  isCurrent && !isStaleSessionError(err) ? err : new StaleSessionError();
 
 export const commitMemberUpdate = (
   ticket: SessionTicket,

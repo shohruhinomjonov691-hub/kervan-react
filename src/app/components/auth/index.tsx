@@ -92,11 +92,13 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       setMemberPassword("");
     } catch (err) {
       console.log(err);
+      // Kutish davomida boshqa auth amali boshlangan — eski javob (muvaffaqiyat
+      // yoki xato) modal, input va alert'ga ta'sir qilmaydi
+      if (isStaleSessionError(err)) return;
       handleLoginClose();
       setMemberNick("");
       setMemberPassword("");
-      // Kutish davomida boshqa auth amali boshlangan — eski javob e'tiborsiz
-      if (!isStaleSessionError(err)) sweetErrorHandling(err).then();
+      sweetErrorHandling(err).then();
     }
   };
 
@@ -114,12 +116,14 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       setMemberPassword("");
     } catch (err) {
       console.log(err);
+      // Kutish davomida boshqa auth amali boshlangan — eski javob (muvaffaqiyat
+      // yoki xato) modal, input va alert'ga ta'sir qilmaydi
+      if (isStaleSessionError(err)) return;
       handleLoginClose();
       setMemberNick("");
       setMemberPhone("");
       setMemberPassword("");
-      // Kutish davomida boshqa auth amali boshlangan — eski javob e'tiborsiz
-      if (!isStaleSessionError(err)) sweetErrorHandling(err).then();
+      sweetErrorHandling(err).then();
     }
   };
 
