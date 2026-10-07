@@ -11,8 +11,10 @@ import {
   StaleSessionError,
   beginAuthChange,
   clearStoredMember,
+  commitMemberUpdate,
   isCurrentGeneration,
   storeMember,
+  takeSessionTicket,
 } from "../context/authSession";
 
 class MemberService {
@@ -114,6 +116,7 @@ class MemberService {
   }
 
   public async updateMember(input: MemberUpdateInput): Promise<Member> {
+    const ticket = takeSessionTicket();
     try {
       const formData = new FormData();
       formData.append("memberNick", input.memberNick || "");
@@ -133,9 +136,7 @@ class MemberService {
 
       console.log("updateMember:", result);
 
-      const member: Member = result.data;
-      localStorage.setItem("memberData", JSON.stringify(member));
-      return member;
+      return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error updateMember:", err);
       throw err;
@@ -143,13 +144,12 @@ class MemberService {
   }
 
   public async savePaymentMethod(input: MemberPaymentInput): Promise<Member> {
+    const ticket = takeSessionTicket();
     try {
       const url = `${serverApi}/member/payment`;
       const result = await axios.post(url, input, { withCredentials: true });
 
-      const member: Member = result.data;
-      localStorage.setItem("memberData", JSON.stringify(member));
-      return member;
+      return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error savePaymentMethod:", err);
       throw err;
@@ -157,13 +157,12 @@ class MemberService {
   }
 
   public async generatePaymentMethod(): Promise<Member> {
+    const ticket = takeSessionTicket();
     try {
       const url = `${serverApi}/member/payment/generate`;
       const result = await axios.post(url, {}, { withCredentials: true });
 
-      const member: Member = result.data;
-      localStorage.setItem("memberData", JSON.stringify(member));
-      return member;
+      return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error generatePaymentMethod:", err);
       throw err;
@@ -171,14 +170,13 @@ class MemberService {
   }
 
   public async removePaymentMethod(): Promise<Member> {
+    const ticket = takeSessionTicket();
     try {
       const url = `${serverApi}/member/payment/remove`;
       const result = await axios.post(url, {}, { withCredentials: true });
       console.log("removePaymentMethod:", result);
 
-      const member: Member = result.data;
-      localStorage.setItem("memberData", JSON.stringify(member));
-      return member;
+      return commitMemberUpdate(ticket, result.data);
     } catch (err) {
       console.log("Error removePaymentMethod:", err);
       throw err;

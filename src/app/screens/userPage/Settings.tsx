@@ -10,6 +10,7 @@ import {
 } from "../../../lib/sweetAlert";
 import { Messages, serverApi } from "../../../lib/config";
 import MemberService from "../../services/MemberService";
+import { isStaleSessionError } from "../../context/authSession";
 
 const inputSx = {
   "& .MuiOutlinedInput-root": {
@@ -71,6 +72,8 @@ export default function Settings() {
       setAuthMember(result);
       await sweetTopSmallSuccessAlert("Profile updated! ✓", 1000);
     } catch (err) {
+      // Eskirgan sessiya javobi (logout/akkaunt almashgan) — jim o'tkaziladi
+      if (isStaleSessionError(err)) return;
       sweetErrorHandling(err).then();
     }
   };

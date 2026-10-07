@@ -10,6 +10,12 @@ import {
   sweetTopSmallSuccessAlert,
 } from "../../../lib/sweetAlert";
 import MemberService from "../../services/MemberService";
+import { Member } from "../../../lib/types/member";
+import {
+  getAuthGeneration,
+  isCurrentGeneration,
+  isStaleSessionError,
+} from "../../context/authSession";
 
 const inputSx = {
   "& .MuiOutlinedInput-root": {
@@ -40,7 +46,11 @@ const emptyForm: MemberPaymentInput = {
 export default function PaymentMethod() {
   const { authMember, setAuthMember } = useGlobals();
   const [formOpen, setFormOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
+  // Qaysi sessiya (generation) uchun so'rov kutilyapti. Akkaunt almashsa,
+  // eski so'rov yangi sessiyada "Saving..." holatini ko'rsatmaydi va tugaganda
+  // yangi sessiyaning o'z so'rovini ham bo'shatib yubormaydi
+  const [pendingGen, setPendingGen] = useState<number | null>(null);
+  const saving = pendingGen !== null && isCurrentGeneration(pendingGen);
   const [form, setForm] = useState<MemberPaymentInput>(emptyForm);
 
   const memberPayment = authMember?.memberPayment;
@@ -85,51 +95,65 @@ export default function PaymentMethod() {
     setFormOpen(true);
   };
 
+  // Karta so'rovlari uchun umumiy oqim: javob eskirgan sessiyaga tegishli
+  // bo'lsa (logout/login/boshqa akkaunt) — auth state, alert va loading'ga
+  // tegmaydi. Storage'ni MemberService session ticket orqali himoyalaydi
+  const runCardAction = async (
+    action: () => Promise<Member>,
+    successMessage: string,
+    onSuccess?: () => void,
+  ) => {
+    const gen = getAuthGeneration();
+    setPendingGen(gen);
+    try {
+      const result = await action();
+      if (!isCurrentGeneration(gen)) return;
+      setAuthMember(result);
+      onSuccess?.();
+      await sweetTopSmallSuccessAlert(successMessage, 1200);
+    } catch (err) {
+      if (isStaleSessionError(err) || !isCurrentGeneration(gen)) return;
+      sweetErrorHandling(err).then();
+    } finally {
+      setPendingGen((current) => (current === gen ? null : current));
+    }
+  };
+
   const handleSave = async () => {
-    try {
-      const validationError = validateForm();
-      if (validationError) throw new Error(validationError);
-
-      setSaving(true);
-      const result = await new MemberService().savePaymentMethod({
-        cardHolder: form.cardHolder.trim(),
-        cardExpiry: form.cardExpiry,
-      });
-      setAuthMember(result);
-      setForm(emptyForm);
-      setFormOpen(false);
-      await sweetTopSmallSuccessAlert("Demo card updated! 💳", 1200);
-    } catch (err) {
-      sweetErrorHandling(err).then();
-    } finally {
-      setSaving(false);
+    const validationError = validateForm();
+    if (validationError) {
+      sweetErrorHandling(new Error(validationError)).then();
+      return;
     }
+
+    await runCardAction(
+      () =>
+        new MemberService().savePaymentMethod({
+          cardHolder: form.cardHolder.trim(),
+          cardExpiry: form.cardExpiry,
+        }),
+      "Demo card updated! 💳",
+      () => {
+        setForm(emptyForm);
+        setFormOpen(false);
+      },
+    );
   };
 
-  const handleGenerate = async () => {
-    try {
-      setSaving(true);
-      const result = await new MemberService().generatePaymentMethod();
-      setAuthMember(result);
-      await sweetTopSmallSuccessAlert("Demo card created! 💳", 1200);
-    } catch (err) {
-      sweetErrorHandling(err).then();
-    } finally {
-      setSaving(false);
-    }
-  };
+  const handleGenerate = () =>
+    runCardAction(
+      () => new MemberService().generatePaymentMethod(),
+      "Demo card created! 💳",
+    );
 
   const handleRemove = async () => {
     const confirmed = window.confirm("Remove this demo card?");
     if (!confirmed) return;
-    try {
-      const result = await new MemberService().removePaymentMethod();
-      setAuthMember(result);
-      setFormOpen(false);
-      await sweetTopSmallSuccessAlert("Demo card removed.", 1000);
-    } catch (err) {
-      sweetErrorHandling(err).then();
-    }
+    await runCardAction(
+      () => new MemberService().removePaymentMethod(),
+      "Demo card removed.",
+      () => setFormOpen(false),
+    );
   };
 
   /* ── NO CARD: GENERATE ── */
@@ -262,6 +286,7 @@ export default function PaymentMethod() {
           className="pm-remove-btn"
           startIcon={<DeleteOutlineIcon sx={{ fontSize: 16 }} />}
           onClick={handleRemove}
+          disabled={saving}
         >
           Remove
         </Button>
