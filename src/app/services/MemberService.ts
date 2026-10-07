@@ -130,7 +130,6 @@ class MemberService {
 
   public async savePaymentMethod(input: MemberPaymentInput): Promise<Member> {
     try {
-      // ⚠️ karta raqami/CVV console'ga chiqarilmaydi
       const url = `${serverApi}/member/payment`;
       const result = await axios.post(url, input, { withCredentials: true });
 
@@ -139,6 +138,20 @@ class MemberService {
       return member;
     } catch (err) {
       console.log("Error savePaymentMethod:", err);
+      throw err;
+    }
+  }
+
+  public async generatePaymentMethod(): Promise<Member> {
+    try {
+      const url = `${serverApi}/member/payment/generate`;
+      const result = await axios.post(url, {}, { withCredentials: true });
+
+      const member: Member = result.data;
+      localStorage.setItem("memberData", JSON.stringify(member));
+      return member;
+    } catch (err) {
+      console.log("Error generatePaymentMethod:", err);
       throw err;
     }
   }

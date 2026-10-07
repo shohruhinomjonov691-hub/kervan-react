@@ -7,12 +7,11 @@ export interface MemberPayment {
   cardExpiry: string;
 }
 
-// Raw form input — validated server-side, never persisted or logged as-is
+// Demo karta tahriri — raqam/brand serverda generatsiya qilinadi,
+// user faqat holder va expiry'ni o'zgartiradi
 export interface MemberPaymentInput {
-  cardNumber: string;
   cardHolder: string;
   cardExpiry: string;
-  cardCvv: string;
 }
 
 export interface Member {

@@ -59,7 +59,7 @@ export default function PausedOrders({ setValue }: PausedOrdersProps) {
 
       if (!authMember.memberPayment) {
         const goToPayments = window.confirm(
-          "No payment method saved. Add one now in your profile?",
+          "No demo card yet. Generate one now in your profile?",
         );
         if (goToPayments) history.push("/member-page?tab=payments");
         return;

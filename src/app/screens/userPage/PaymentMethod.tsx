@@ -30,15 +30,13 @@ const inputSx = {
 };
 
 const emptyForm: MemberPaymentInput = {
-  cardNumber: "",
   cardHolder: "",
   cardExpiry: "",
-  cardCvv: "",
 };
 
-/** Faqat namoyish (demo/portfolio) uchun — haqiqiy to'lov provayderi yo'q.
- * Karta raqami/CVV hech qachon serverga saqlash uchun to'liq holida qaytmaydi;
- * backend faqat brand+last4'ni saqlaydi. **/
+/** Faqat namoyish (demo/portfolio) uchun — haqiqiy to'lov provayderi yo'q,
+ * real karta ma'lumoti so'ralmaydi va pul yechilmaydi. Karta raqami (last4)
+ * serverda generatsiya qilinadi; user faqat holder va expiry'ni tahrirlaydi. **/
 export default function PaymentMethod() {
   const { authMember, setAuthMember } = useGlobals();
   const [formOpen, setFormOpen] = useState(false);
@@ -50,44 +48,20 @@ export default function PaymentMethod() {
   const handleField = (field: keyof MemberPaymentInput) => (e: T) => {
     let value: string = e.target.value;
 
-    if (field === "cardNumber") {
-      value = value
-        .replace(/\D/g, "")
-        .slice(0, 19)
-        .replace(/(.{4})/g, "$1 ")
-        .trim();
-    } else if (field === "cardExpiry") {
+    if (field === "cardExpiry") {
       value = value
         .replace(/\D/g, "")
         .slice(0, 4)
         .replace(/(\d{2})(\d)/, "$1/$2");
-    } else if (field === "cardCvv") {
-      value = value.replace(/\D/g, "").slice(0, 4);
     }
 
     setForm({ ...form, [field]: value });
   };
 
-  const luhnCheck = (digits: string): boolean => {
-    let sum = 0;
-    let shouldDouble = false;
-    for (let i = digits.length - 1; i >= 0; i--) {
-      let digit = parseInt(digits.charAt(i), 10);
-      if (shouldDouble) {
-        digit *= 2;
-        if (digit > 9) digit -= 9;
-      }
-      sum += digit;
-      shouldDouble = !shouldDouble;
-    }
-    return sum % 10 === 0;
-  };
-
   const validateForm = (): string | null => {
-    const cardNumber = form.cardNumber.replace(/\s+/g, "");
-    if (!/^\d{13,19}$/.test(cardNumber) || !luhnCheck(cardNumber)) {
-      return "Please enter a valid card number.";
-    }
+    const holder = form.cardHolder.trim();
+    if (holder.length < 2 || holder.length > 40)
+      return "Cardholder name must be 2–40 characters.";
     const expiryMatch = /^(\d{2})\/(\d{2})$/.exec(form.cardExpiry);
     if (!expiryMatch) return "Please enter expiry as MM/YY.";
     const month = Number(expiryMatch[1]);
@@ -98,12 +72,17 @@ export default function PaymentMethod() {
       year < now.getFullYear() ||
       (year === now.getFullYear() && month < now.getMonth() + 1)
     ) {
-      return "This card has expired.";
+      return "Expiry date must not be in the past.";
     }
-    if (!/^\d{3,4}$/.test(form.cardCvv)) return "Please enter a valid CVV.";
-    if (form.cardHolder.trim().length < 2)
-      return "Please enter the cardholder name.";
     return null;
+  };
+
+  const openEdit = () => {
+    setForm({
+      cardHolder: memberPayment?.cardHolder ?? "",
+      cardExpiry: memberPayment?.cardExpiry ?? "",
+    });
+    setFormOpen(true);
   };
 
   const handleSave = async () => {
@@ -112,11 +91,27 @@ export default function PaymentMethod() {
       if (validationError) throw new Error(validationError);
 
       setSaving(true);
-      const result = await new MemberService().savePaymentMethod(form);
+      const result = await new MemberService().savePaymentMethod({
+        cardHolder: form.cardHolder.trim(),
+        cardExpiry: form.cardExpiry,
+      });
       setAuthMember(result);
       setForm(emptyForm);
       setFormOpen(false);
-      await sweetTopSmallSuccessAlert("Payment method saved! 💳", 1200);
+      await sweetTopSmallSuccessAlert("Demo card updated! 💳", 1200);
+    } catch (err) {
+      sweetErrorHandling(err).then();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    try {
+      setSaving(true);
+      const result = await new MemberService().generatePaymentMethod();
+      setAuthMember(result);
+      await sweetTopSmallSuccessAlert("Demo card created! 💳", 1200);
     } catch (err) {
       sweetErrorHandling(err).then();
     } finally {
@@ -125,83 +120,93 @@ export default function PaymentMethod() {
   };
 
   const handleRemove = async () => {
-    const confirmed = window.confirm("Remove this payment method?");
+    const confirmed = window.confirm("Remove this demo card?");
     if (!confirmed) return;
     try {
       const result = await new MemberService().removePaymentMethod();
       setAuthMember(result);
-      await sweetTopSmallSuccessAlert("Payment method removed.", 1000);
+      setFormOpen(false);
+      await sweetTopSmallSuccessAlert("Demo card removed.", 1000);
     } catch (err) {
       sweetErrorHandling(err).then();
     }
   };
 
-  /* ── ADD/REPLACE CARD FORM ── */
-  if (formOpen || !memberPayment) {
+  /* ── NO CARD: GENERATE ── */
+  if (!memberPayment) {
     return (
       <Stack gap={2.5}>
-        {!memberPayment && (
-          <Box className="pm-empty">
-            <CreditCardOutlinedIcon sx={{ fontSize: 28, color: "#dbc2b0" }} />
-            <Typography className="pm-empty-text">
-              No payment method saved yet. Add a demo card to enable "Pay
-              Now" on your orders.
-            </Typography>
-          </Box>
-        )}
+        <Box className="pm-empty">
+          <CreditCardOutlinedIcon sx={{ fontSize: 28, color: "#dbc2b0" }} />
+          <Typography className="pm-empty-text">
+            No demo card yet. Generate one to enable "Pay Now" on your
+            orders.
+          </Typography>
+        </Box>
 
+        <Typography className="pm-disclaimer">
+          Demo payment for this portfolio project — no real card details are
+          needed and no real money is ever charged.
+        </Typography>
+
+        <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+          <Button
+            variant="contained"
+            onClick={handleGenerate}
+            disabled={saving}
+            className="settings-save-btn"
+          >
+            {saving ? "Generating..." : "Generate demo card"}
+          </Button>
+        </Stack>
+      </Stack>
+    );
+  }
+
+  /* ── EDIT CARD FORM (holder + expiry) ── */
+  if (formOpen) {
+    return (
+      <Stack gap={2.5}>
         <TextField
           fullWidth
           label="Card Number"
-          placeholder="4242 4242 4242 4242"
-          value={form.cardNumber}
-          onChange={handleField("cardNumber")}
+          value={`•••• •••• •••• ${memberPayment.cardLast4}`}
+          disabled
+          helperText="Generated automatically for the demo"
           sx={inputSx}
         />
         <TextField
           fullWidth
           label="Cardholder Name"
-          placeholder="As shown on card"
           value={form.cardHolder}
           onChange={handleField("cardHolder")}
+          inputProps={{ maxLength: 40 }}
           sx={inputSx}
         />
-        <Stack direction="row" gap={2}>
-          <TextField
-            fullWidth
-            label="Expiry (MM/YY)"
-            placeholder="12/28"
-            value={form.cardExpiry}
-            onChange={handleField("cardExpiry")}
-            sx={inputSx}
-          />
-          <TextField
-            fullWidth
-            label="CVV"
-            placeholder="123"
-            value={form.cardCvv}
-            onChange={handleField("cardCvv")}
-            sx={inputSx}
-          />
-        </Stack>
+        <TextField
+          fullWidth
+          label="Expiry (MM/YY)"
+          placeholder="12/28"
+          value={form.cardExpiry}
+          onChange={handleField("cardExpiry")}
+          sx={inputSx}
+        />
 
         <Typography className="pm-disclaimer">
-          Demo payment method for this portfolio project — no real card
-          data is ever charged or stored.
+          Demo payment for this portfolio project — no real money is ever
+          charged.
         </Typography>
 
         <Stack direction="row" gap={1.5} sx={{ justifyContent: "flex-end" }}>
-          {memberPayment && (
-            <Button
-              className="up-back-btn"
-              onClick={() => {
-                setForm(emptyForm);
-                setFormOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-          )}
+          <Button
+            className="up-back-btn"
+            onClick={() => {
+              setForm(emptyForm);
+              setFormOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={handleSave}
@@ -248,10 +253,10 @@ export default function PaymentMethod() {
       <Stack direction="row" gap={1.5}>
         <Button
           className="up-back-btn"
-          onClick={() => setFormOpen(true)}
+          onClick={openEdit}
           sx={{ flex: 1 }}
         >
-          Replace Card
+          Edit Card
         </Button>
         <Button
           className="pm-remove-btn"
