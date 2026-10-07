@@ -11,7 +11,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import { CartItem } from "../../../lib/types/search";
 import { serverApi, Messages } from "../../../lib/config";
@@ -281,14 +281,14 @@ export default function BasketPage(props: BasketPageProps) {
               {isSubmitting ? "Placing Order..." : "Proceed to Checkout →"}
             </Button>
 
-            {/* Security note */}
+            {/* Demo payment note — real to'lov provayderi yo'q, pul yechilmaydi */}
             <Box className="basket-security-note">
-              <LockOutlinedIcon
+              <InfoOutlinedIcon
                 sx={{ fontSize: 16, color: "#8d4b00", flexShrink: 0 }}
               />
               <Typography className="basket-security-text">
-                Your payment is secured with 256-bit SSL encryption. We accept
-                all major cards.
+                Demo payment only — this is a portfolio project. No real money
+                is charged and no real card details are needed.
               </Typography>
             </Box>
 
