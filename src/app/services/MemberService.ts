@@ -7,6 +7,13 @@ import {
   MemberPaymentInput,
   MemberUpdateInput,
 } from "../../lib/types/member";
+import {
+  StaleSessionError,
+  beginAuthChange,
+  clearStoredMember,
+  isCurrentGeneration,
+  storeMember,
+} from "../context/authSession";
 
 class MemberService {
   private readonly path: string;
@@ -43,7 +50,7 @@ class MemberService {
   }
 
   // Sahifa yangilanganda auth'ni cookie orqali serverdan tiklash uchun.
-  // localStorage'ga yozish ContextProvider'da — u 401/5xx farqini hal qiladi
+  // Storage'ga yozish ContextProvider'da — u generation va 401/5xx'ni hal qiladi
   public async getMemberDetail(): Promise<Member> {
     const url = this.path + "/member/detail";
     const result = await axios.get(url, { withCredentials: true });
@@ -51,6 +58,7 @@ class MemberService {
   }
 
   public async signup(input: MemberInput): Promise<Member> {
+    const gen = beginAuthChange();
     try {
       const url = this.path + "/member/signup";
       const result = await axios.post(url, input, { withCredentials: true });
@@ -58,7 +66,9 @@ class MemberService {
 
       const member: Member = result.data.member;
       console.log("member:", member);
-      localStorage.setItem("memberData", JSON.stringify(member));
+      // Kutish davomida boshqa auth o'zgarishi boshlangan bo'lsa — bu javob eskirgan
+      if (!isCurrentGeneration(gen)) throw new StaleSessionError();
+      storeMember(member);
 
       return member;
     } catch (err) {
@@ -68,6 +78,7 @@ class MemberService {
   }
 
   public async login(input: LoginInput): Promise<Member> {
+    const gen = beginAuthChange();
     try {
       const url = this.path + "/member/login";
       const result = await axios.post(url, input, { withCredentials: true });
@@ -75,7 +86,8 @@ class MemberService {
 
       const member: Member = result.data.member;
       console.log("member:", member);
-      localStorage.setItem("memberData", JSON.stringify(member));
+      if (!isCurrentGeneration(gen)) throw new StaleSessionError();
+      storeMember(member);
 
       return member;
     } catch (err) {
@@ -85,12 +97,14 @@ class MemberService {
   }
 
   public async logout(): Promise<void> {
+    // Boshlanishidayoq: kutilayotgan restore/karta javoblari endi qo'llanmaydi
+    beginAuthChange();
     try {
       const url = this.path + "/member/logout";
       const result = await axios.post(url, {}, { withCredentials: true });
       console.log("logout:", result);
 
-      localStorage.removeItem("memberData");
+      clearStoredMember();
 
       return result.data.logout;
     } catch (err) {

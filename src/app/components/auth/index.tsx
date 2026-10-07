@@ -23,6 +23,7 @@ import {
   sweetTopSmallSuccessAlert,
 } from "../../../lib/sweetAlert";
 import { useGlobals } from "../../hooks/useGlobals";
+import { isStaleSessionError } from "../../context/authSession";
 
 interface AuthenticationModalProps {
   signupOpen: boolean;
@@ -94,7 +95,8 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       handleLoginClose();
       setMemberNick("");
       setMemberPassword("");
-      sweetErrorHandling(err).then();
+      // Kutish davomida boshqa auth amali boshlangan — eski javob e'tiborsiz
+      if (!isStaleSessionError(err)) sweetErrorHandling(err).then();
     }
   };
 
@@ -116,7 +118,8 @@ export default function AuthenticationModal(props: AuthenticationModalProps) {
       setMemberNick("");
       setMemberPhone("");
       setMemberPassword("");
-      sweetErrorHandling(err).then();
+      // Kutish davomida boshqa auth amali boshlangan — eski javob e'tiborsiz
+      if (!isStaleSessionError(err)) sweetErrorHandling(err).then();
     }
   };
 
