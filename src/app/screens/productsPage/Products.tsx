@@ -22,7 +22,7 @@ import { createSelector } from "reselect";
 import { setProducts } from "./slice";
 import { retrieveProducts } from "./selector";
 import { Product, ProductInquiry } from "../../../lib/types/product";
-import { ProductCollection } from "../../../lib/enums/product.enum";
+import { ProductCollection, ProductTag } from "../../../lib/enums/product.enum";
 import ProductService from "../../services/ProductService";
 import { serverApi } from "../../../lib/config";
 import { CartItem } from "../../../lib/types/search";
@@ -65,16 +65,36 @@ const branches = [
   },
 ];
 
-/* Filter chips */
+/* Filter chips — kervan-menu.json categories sortOrder tartibida */
 const filterChips = [
   { label: "All", value: undefined },
-  { label: "Kebab", value: ProductCollection.KEBAB },
+  { label: "Lunch Menu", value: ProductCollection.LUNCH },
+  { label: "Salad & Appetizer", value: ProductCollection.SALAD_APPETIZER },
+  { label: "Bread & Sides", value: ProductCollection.BREAD_SIDES },
+  { label: "Kebab & Steak", value: ProductCollection.KEBAB_STEAK },
   { label: "Pide", value: ProductCollection.PIDE },
-  { label: "Meze", value: ProductCollection.MEZE },
-  { label: "Soup", value: ProductCollection.SOUP },
-  { label: "Desserts", value: ProductCollection.DESSERT },
-  { label: "Drinks", value: ProductCollection.DRINK },
+  { label: "Curry & Lavash Set", value: ProductCollection.CURRY_LAVASH },
+  { label: "Kervan Special", value: ProductCollection.KERVAN_SPECIAL },
+  { label: "Couple Set Menu", value: ProductCollection.COUPLE_SET },
+  { label: "Dessert", value: ProductCollection.DESSERT },
+  { label: "Drink", value: ProductCollection.DRINK },
+  { label: "Coffee & Tea", value: ProductCollection.COFFEE_TEA },
 ];
+
+/* Card badges — SIZE_1_5 kartochkada ko'rsatilmaydi */
+const tagBadges = [
+  { label: "Recommended", value: ProductTag.RECOMMENDED },
+  { label: "New", value: ProductTag.NEW },
+  { label: "Veggy", value: ProductTag.VEGGY },
+  { label: "Spicy 🌶", value: ProductTag.SPICY },
+];
+
+// "KEBAB_STEAK" => "Kebab & Steak"
+const getCollectionLabel = (collection: ProductCollection) =>
+  filterChips.find((chip) => chip.value === collection)?.label ?? collection;
+
+// 15900 => "15,900₩"
+const formatPrice = (price: number) => `${price.toLocaleString("en-US")}₩`;
 
 interface ProductsProps {
   onAdd: (item: CartItem) => void;
@@ -113,9 +133,11 @@ export default function Products(props: ProductsProps) {
 
   /** HANDLERS **/
   const searchCollectionHandler = (collection?: ProductCollection) => {
+    // Bo'lim tanlansa — menyudagi tartibda chiqsin
     setProductSearch((prev) => ({
       ...prev,
       page: 1,
+      order: collection ? "productSortOrder" : prev.order,
       productCollection: collection,
     }));
   };
@@ -200,6 +222,7 @@ export default function Products(props: ProductsProps) {
               size="small"
               className="sort-select"
             >
+              <MenuItem value="productSortOrder">Menu Order</MenuItem>
               <MenuItem value="productViews">Most Popular</MenuItem>
               <MenuItem value="productPrice">Price</MenuItem>
               <MenuItem value="createdAt">Newest</MenuItem>
@@ -248,7 +271,7 @@ export default function Products(props: ProductsProps) {
                     />
                     {/* Collection badge */}
                     <Box className="product-card-collection">
-                      {product.productCollection}
+                      {getCollectionLabel(product.productCollection)}
                     </Box>
 
                     {/* ✅ Hover overlay + basket button */}
@@ -273,13 +296,36 @@ export default function Products(props: ProductsProps) {
                       justifyContent="space-between"
                       alignItems="flex-start"
                     >
-                      <Typography className="product-card-name">
-                        {product.productName}
-                      </Typography>
+                      <Box>
+                        <Typography className="product-card-name">
+                          {product.productName}
+                        </Typography>
+                        {product.productNameKo && (
+                          <Typography className="product-card-name-ko">
+                            {product.productNameKo}
+                          </Typography>
+                        )}
+                      </Box>
                       <Typography className="product-card-price">
-                        ₩{product.productPrice.toLocaleString()}
+                        {formatPrice(product.productPrice)}
                       </Typography>
                     </Stack>
+
+                    {/* Tag badges */}
+                    {product.productTags?.length > 0 && (
+                      <Stack direction="row" gap={0.75} flexWrap="wrap" sx={{ mt: 1 }}>
+                        {tagBadges
+                          .filter((tag) => product.productTags.includes(tag.value))
+                          .map((tag) => (
+                            <Box
+                              key={tag.value}
+                              className={`product-card-tag product-card-tag--${tag.value.toLowerCase()}`}
+                            >
+                              {tag.label}
+                            </Box>
+                          ))}
+                      </Stack>
+                    )}
 
                     {product.productDesc && (
                       <Typography className="product-card-desc">

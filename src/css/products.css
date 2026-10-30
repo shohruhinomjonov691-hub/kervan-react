@@ -144,6 +144,36 @@
   font-weight: 600 !important;
   color: #1c1b1b !important;
 }
+.product-card-name-ko {
+  font-family: "Be Vietnam Pro", sans-serif !important;
+  font-size: 0.8125rem !important;
+  color: #887364 !important;
+  margin-top: 2px !important;
+}
+.product-card-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #dbc2b0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #554336;
+}
+.product-card-tag--recommended {
+  background: #8d4b00;
+  border-color: #8d4b00;
+  color: #fff;
+}
+.product-card-tag--new {
+  background: #895033;
+  border-color: #895033;
+  color: #fff;
+}
+.product-card-tag--spicy {
+  border-color: #ba1a1a;
+  color: #ba1a1a;
+}
 .product-card-price {
   font-family: "Be Vietnam Pro", sans-serif !important;
   font-size: 1rem !important;

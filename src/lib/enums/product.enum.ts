@@ -18,14 +18,25 @@ export enum ProductStatus {
   DELETE = "DELETE",
 }
 
+// kervan-menu.json categories[].key — sortOrder tartibida
 export enum ProductCollection {
-  KEBAB = "KEBAB",
+  LUNCH = "LUNCH",
+  SALAD_APPETIZER = "SALAD_APPETIZER",
+  BREAD_SIDES = "BREAD_SIDES",
+  KEBAB_STEAK = "KEBAB_STEAK",
   PIDE = "PIDE",
-  MEZE = "MEZE",
-  SOUP = "SOUP",
-  SALAD = "SALAD",
+  CURRY_LAVASH = "CURRY_LAVASH",
+  KERVAN_SPECIAL = "KERVAN_SPECIAL",
+  COUPLE_SET = "COUPLE_SET",
   DESSERT = "DESSERT",
   DRINK = "DRINK",
-  SET_MENU = "SET_MENU",
-  OTHER = "OTHER",
+  COFFEE_TEA = "COFFEE_TEA",
+}
+
+export enum ProductTag {
+  RECOMMENDED = "RECOMMENDED",
+  NEW = "NEW",
+  VEGGY = "VEGGY",
+  SPICY = "SPICY",
+  SIZE_1_5 = "SIZE_1_5",
 }

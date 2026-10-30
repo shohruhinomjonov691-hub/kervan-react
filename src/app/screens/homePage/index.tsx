@@ -30,13 +30,13 @@ export default function HomePage() {
   useEffect(() => {
     const product = new ProductService();
 
-    // Signature Dishes — most viewed KEBABs
+    // Signature Dishes — most viewed Kebab & Steak
     product
       .getProducts({
         page: 1,
         limit: 4,
         order: "productViews",
-        productCollection: ProductCollection.KEBAB,
+        productCollection: ProductCollection.KEBAB_STEAK,
       })
       .then((data) => setPopularDishes(data))
       .catch((err) => console.log(err));
